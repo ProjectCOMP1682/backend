@@ -62,11 +62,24 @@ let handleLogin = async (req, res) => {
         })
     }
 }
+let handleChangePassword = async (req, res) => {
+    try {
+        let data = await userService.handleChangePassword(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     handleCreateNewUser: handleCreateNewUser,
     handleUpdateUser: handleUpdateUser,
     handleBanUser: handleBanUser,
     handleUnbanUser: handleUnbanUser,
     handleLogin: handleLogin,
+    handleChangePassword: handleChangePassword,
 
 }

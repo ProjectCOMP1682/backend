@@ -370,7 +370,42 @@ let handleLogin = (data) => {
         }
     })
 }
+let handleChangePassword = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id || !data.password || !data.oldpassword) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter!'
+                })
+            } else {
+                let account = await db.Account.findOne({
+                    where: { userId: data.id },
+                    raw: false
+                })
+                if (await bcrypt.compareSync(data.oldpassword, account.password)) {
+                    if (account) {
+                        account.password = await hashUserPasswordFromBcrypt(data.password);
+                        await account.save();
+                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'ok'
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Mật khẩu cũ không chính xác'
+                    })
+                }
 
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewUser: handleCreateNewUser,
     updateUserData: updateUserData,
@@ -378,5 +413,6 @@ module.exports = {
     banUser: banUser,
     unbanUser: unbanUser,
     handleLogin: handleLogin,
+    handleChangePassword: handleChangePassword,
 
 }
