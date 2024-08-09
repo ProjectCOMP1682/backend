@@ -406,6 +406,33 @@ let handleChangePassword = (data) => {
         }
     })
 }
+let changePaswordByPhone = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let account = await db.Account.findOne({
+                where: { phonenumber: data.phonenumber },
+                raw: false
+            })
+            if (account) {
+                account.password = await hashUserPasswordFromBcrypt(data.password);
+                await account.save();
+                resolve({
+                    errCode: 0,
+                    errMessage: 'ok'
+                })
+            }
+            else {
+                resolve({
+                    errCode:1,
+                    errMessage: 'SĐT không tồn tại'
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewUser: handleCreateNewUser,
     updateUserData: updateUserData,
@@ -414,5 +441,6 @@ module.exports = {
     unbanUser: unbanUser,
     handleLogin: handleLogin,
     handleChangePassword: handleChangePassword,
+    changePaswordByPhone: changePaswordByPhone,
 
 }

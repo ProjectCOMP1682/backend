@@ -14,6 +14,7 @@ let initWebRoutes = (app) => {
     router.post('/api/unban-user', middlewareControllers.verifyTokenAdmin ,userController.handleUnbanUser)
     router.post('/api/login', userController.handleLogin)
     router.post('/api/changepassword', middlewareControllers.verifyTokenUser,userController.handleChangePassword)
+    router.post('/api/changepasswordbyPhone', userController.changePaswordByPhone)
 
     return app.use("/", router);
 }
