@@ -19,7 +19,7 @@ let handleCreateNewAllCode = (data) => {
                 if (res) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Mã code đã tồn tại !'
+                        errMessage: 'Code already exists !'
                     })
                 } else {
                     let imageUrl = ""
@@ -78,21 +78,85 @@ let handleUpdateAllCode = (data) => {
                     if (res)
                         resolve({
                             errCode: 0,
-                            errMessage: 'Đã chỉnh sửa thành công'
+                            errMessage: 'Edited successfully'
                         })
                     else {
                         resolve({
                             errCode: 1,
-                            errMessage: 'Có lỗi trong quá trình chỉnh sửa'
+                            errMessage: 'There was an error during editing.'
                         })
                     }
                 }
                 else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tồn tại code'
+                        errMessage: 'Code does not exist'
                     })
                 }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let handleDeleteAllCode = (code) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!code) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundAllCode = await db.Allcode.findOne({
+                    where: { code: code }
+                })
+                if (!foundAllCode) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Code does not exist`
+                    })
+                }
+                else {
+                    await db.Allcode.destroy({
+                        where: { code: code }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: `Deleted successfully`
+                    })
+                }
+            }
+
+        } catch (error) {
+            if (error.message.includes('a foreign key constraint fails')) {
+                resolve({
+                    errCode: 3,
+                    errMessage: `You cannot delete this information because other data is involved.`
+                })
+            }
+            reject(error.message)
+        }
+    })
+}
+let getAllCodeService = (typeInput) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!typeInput) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+
+                let allcode = await db.Allcode.findAll({
+                    where: { type: typeInput }
+                })
+                resolve({
+                    errCode: 0,
+                    data: allcode
+                })
             }
         } catch (error) {
             reject(error)
@@ -102,5 +166,7 @@ let handleUpdateAllCode = (data) => {
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
+    handleDeleteAllCode: handleDeleteAllCode,
+    getAllCodeService: getAllCodeService,
 
 }

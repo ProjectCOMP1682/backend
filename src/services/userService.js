@@ -19,7 +19,7 @@ let sendmail = (note, userMail, link = null) => {
     let mailOptions = {
         from: '"FIND JOB" <process.env.EMAIL_APP>',
         to: userMail,
-        subject: 'Thông báo từ trang Job Finder',
+        subject: 'Notice from Job Finder page',
         html: note
     };
     if (link)
@@ -82,7 +82,7 @@ let handleCreateNewUser = (data) => {
                 if (check) {
                     resolve({
                         errCode: 1,
-                        errMessage: 'Số điện thoại đã tồn tại !'
+                        errMessage: 'Phone number already exists !'
                     })
                 } else {
                     let imageUrl = ""
@@ -134,7 +134,7 @@ let handleCreateNewUser = (data) => {
                     }
                     resolve({
                         errCode: 0,
-                        message: 'Tạo tài khoản thành công'
+                        message: 'Account created successfully'
                     })
                 }
 
@@ -200,7 +200,7 @@ let updateUserData = (data) => {
                     delete temp.file
                     resolve({
                         errCode: 0,
-                        message: 'Đã chỉnh sửa thành công',
+                        message: 'Edited successfully',
                         user: temp
                     })
                 } else {
@@ -236,7 +236,7 @@ let banUser = (data) => {
                 if (!foundUser) {
                     resolve({
                         errCode: 2,
-                        errMessage: `Người dùng không tồn tại`
+                        errMessage: `User does not exist`
                     })
                 }
                 else{
@@ -250,7 +250,7 @@ let banUser = (data) => {
                         await account.save()
                         resolve({
                             errCode: 0,
-                            message: `Người dùng đã ngừng kích hoạt`
+                            message: `User has been deactivated`
                         })
                     }
                 }
@@ -281,7 +281,7 @@ let unbanUser = (data) => {
                 if (!foundUser) {
                     resolve({
                         errCode: 2,
-                        errMessage: `Người dùng không tồn tại`
+                        errMessage: `User has been deactivated`
                     })
                 }
                 else{
@@ -295,7 +295,7 @@ let unbanUser = (data) => {
                         await account.save()
                         resolve({
                             errCode: 0,
-                            message: `Người dùng đã kích hoạt`
+                            message: `User activated`
                         })
                     }
                 }
@@ -346,12 +346,12 @@ let handleLogin = (data) => {
                             }
                             else {
                                 userData.errCode = 1;
-                                userData.errMessage = 'Tài khoản của bạn đã bị khóa';
+                                userData.errMessage = 'Your account has been banned';
                             }
                         }
                         else {
                             userData.errCode = 2;
-                            userData.errMessage = 'Số điện thoại hoặc mật khẩu không chính xác';
+                            userData.errMessage = 'Incorrect phone number or password';
                         }
                     } else {
                         userData.errCode = 3;
@@ -359,7 +359,7 @@ let handleLogin = (data) => {
                     }
                 } else {
                     userData.errCode = 2;
-                    userData.errMessage = `Số điện thoại hoặc mật khẩu không chính xác`
+                    userData.errMessage = `Incorrect phone number or password`
                 }
                 resolve(userData)
             }
@@ -396,7 +396,7 @@ let handleChangePassword = (data) => {
                 else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Mật khẩu cũ không chính xác'
+                        errMessage: 'Old password is incorrect'
                     })
                 }
 
@@ -425,7 +425,7 @@ let changePaswordByPhone = (data) => {
             else {
                 resolve({
                     errCode:1,
-                    errMessage: 'SĐT không tồn tại'
+                    errMessage: 'Phone number does not exist'
                 })
             }
         } catch (error) {
