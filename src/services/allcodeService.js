@@ -48,8 +48,59 @@ let handleCreateNewAllCode = (data) => {
     })
 }
 
-
+let handleUpdateAllCode = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.value || !data.code) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let res = await db.Allcode.findOne({
+                    where: {
+                        code: data.code
+                    },
+                    raw: false
+                })
+                if (res) {
+                    let imageUrl = ""
+                    if (data.image) {
+                        const uploadedResponse = await cloudinary.uploader.upload(data.image, {
+                            upload_preset: 'dev_setups'
+                        })
+                        imageUrl = uploadedResponse.url
+                        res.image = imageUrl
+                    }
+                    res.value = data.value
+                    res.code = data.code
+                    res = await res.save();
+                    if (res)
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Đã chỉnh sửa thành công'
+                        })
+                    else {
+                        resolve({
+                            errCode: 1,
+                            errMessage: 'Có lỗi trong quá trình chỉnh sửa'
+                        })
+                    }
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Không tồn tại code'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
+    handleUpdateAllCode: handleUpdateAllCode,
 
 }

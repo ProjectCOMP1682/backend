@@ -22,6 +22,7 @@ let initWebRoutes = (app) => {
 
     //===================API ALLCODE========================//
     router.post('/api/create-new-all-code',middlewareControllers.verifyTokenAdmin ,allcodeController.handleCreateNewAllCode)
+    router.put('/api/update-all-code', middlewareControllers.verifyTokenAdmin,allcodeController.handleUpdateAllCode)
 
 
     return app.use("/", router);
