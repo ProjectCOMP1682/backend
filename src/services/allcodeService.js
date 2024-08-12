@@ -192,11 +192,43 @@ let getDetailAllcodeByCode = (code) => {
         }
     })
 }
+let getListAllCodeService = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log(!data.offset)
+            if (!data.type || !data.limit || !data.offset) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let objectFilter = {
+                    where: { type: data.type },
+                    offset: +data.offset,
+                    limit: +data.limit
+                }
+                if (data.search) {
+                    objectFilter.where = { ...objectFilter.where, value: { [Op.like]: `%${data.search}%` } }
+                }
+
+                let allcode = await db.Allcode.findAndCountAll(objectFilter)
+                resolve({
+                    errCode: 0,
+                    data: allcode.rows,
+                    count: allcode.count
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
     handleDeleteAllCode: handleDeleteAllCode,
     getAllCodeService: getAllCodeService,
     getDetailAllcodeByCode: getDetailAllcodeByCode,
+    getListAllCodeService: getListAllCodeService,
 
 }
