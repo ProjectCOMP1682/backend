@@ -163,10 +163,40 @@ let getAllCodeService = (typeInput) => {
         }
     })
 }
+let getDetailAllcodeByCode = (code) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!code) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let data = await db.Allcode.findOne({
+                    where: { code: code }
+                })
+                if (data)
+                    resolve({
+                        errCode: 0,
+                        data: data
+                    })
+                else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'Không tìm thấy code'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
     handleDeleteAllCode: handleDeleteAllCode,
     getAllCodeService: getAllCodeService,
+    getDetailAllcodeByCode: getDetailAllcodeByCode,
 
 }

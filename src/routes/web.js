@@ -25,6 +25,7 @@ let initWebRoutes = (app) => {
     router.put('/api/update-all-code', middlewareControllers.verifyTokenAdmin,allcodeController.handleUpdateAllCode)
     router.delete('/api/delete-all-code', middlewareControllers.verifyTokenAdmin,allcodeController.handleDeleteAllCode)
     router.get('/api/get-all-code', allcodeController.getAllCodeService)
+    router.get('/api/get-detail-all-code-by-code', allcodeController.getDetailAllcodeByCode)
 
 
     return app.use("/", router);
