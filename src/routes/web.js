@@ -1,6 +1,7 @@
 import express from "express";
 import userController from '../controllers/userController';
 import allcodeController from '../controllers/allcodeController';
+import companyController from '../controllers/companyController';
 
 
 import middlewareControllers from '../middlewares/jwtVerify'
@@ -28,6 +29,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-all-code-by-code', allcodeController.getDetailAllcodeByCode)
     router.get('/api/get-list-allcode', allcodeController.getListAllCodeService)
 
+    //==================API COMPANY=========================//
+    router.post('/api/create-new-company', middlewareControllers.verifyTokenUser,companyController.handleCreateNewCompany)
 
     return app.use("/", router);
 }
