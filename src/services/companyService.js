@@ -42,6 +42,10 @@ let checkCompany = (name, id = null) => {
 let handleCreateNewCompany = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
+            resolve({
+                errCode: 2,
+                errMessage: 'Tên công ty đã tồn tại'
+            })
             if (!data.name || !data.phonenumber || !data.address
                 || !data.descriptionHTML || !data.descriptionMarkdown
                 || !data.amountEmployer || !data.userId) {
@@ -51,10 +55,6 @@ let handleCreateNewCompany = (data) => {
                 })
             } else {
                 if (await checkCompany(data.name)) {
-                    resolve({
-                        errCode: 2,
-                        errMessage: 'Tên công ty đã tồn tại'
-                    })
                 }
                 else {
                     let thumbnailUrl = ""
@@ -125,8 +125,94 @@ let handleCreateNewCompany = (data) => {
         }
     })
 }
+let handleUpdateCompany = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id || !data.name || !data.phonenumber || !data.address || !data.descriptionHTML || !data.descriptionMarkdown || !data.amountEmployer) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                if (await checkCompany(data.name, data.id)) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Tên công ty đã tồn tại'
+                    })
+                }
+                else {
 
+                    let res = await db.Company.findOne({
+                        where: {
+                            id: data.id
+                        },
+                        raw: false
+                    })
+                    if (res) {
+                        if (res.statusCode == "S1") {
+                            if (data.thumbnail) {
+                                let thumbnailUrl = ""
+                                const uploadedThumbnailResponse = await cloudinary.uploader.upload(data.thumbnail, {
+                                    upload_preset: 'dev_setups'
+                                })
+                                thumbnailUrl = uploadedThumbnailResponse.url
+                                res.thumbnail = thumbnailUrl
+                            }
+                            if (data.coverimage) {
+                                let coverImageUrl = ""
+                                const uploadedcoverImageResponse = await cloudinary.uploader.upload(data.coverimage, {
+                                    upload_preset: 'dev_setups'
+                                })
+                                coverImageUrl = uploadedcoverImageResponse.url
+                                res.coverimage = coverImageUrl
+                            }
+                            res.name = data.name
+                            res.descriptionHTML = data.descriptionHTML
+                            res.descriptionMarkdown = data.descriptionMarkdown
+                            res.website = data.website
+                            res.address = data.address
+                            res.amountEmployer = data.amountEmployer
+                            res.taxnumber = data.taxnumber
+                            res.phonenumber = data.phonenumber
+                            if (data.file) {
+                                res.file = data.file
+                                res.censorCode = 'CS3'
+                            }
+                            else if (res.file){
+                                res.censorCode = 'CS3'
+                            }
+                            else {
+                                res.censorCode = 'CS2'
+                            }
+                            await res.save();
+                            resolve({
+                                errCode: 0,
+                                errMessage: 'Đã sửa thông tin công ty thành công'
+                            })
+                        }
+                        else {
+                            resolve({
+                                errCode: 2,
+                                errMessage: 'Công ty bạn đã bị chặn không thể thay đổi thông tin'
+                            })
+                        }
+                    }
+                    else {
+                        resolve({
+                            errCode: 2,
+                            errMessage: 'Không tìm thấy công ty'
+                        })
+                    }
+                }
+
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
+    handleUpdateCompany: handleUpdateCompany,
 
 }
