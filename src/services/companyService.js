@@ -3,7 +3,34 @@ import e from "express";
 import db from "../models/index";
 const cloudinary = require('../utils/cloudinary');
 require('dotenv').config();
+var nodemailer = require('nodemailer');
+let sendmail = (note, userMail, link = null) => {
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_APP,
+            pass: process.env.EMAIL_APP_PASSWORD,
+        }
+    });
 
+    var mailOptions = {
+        from: process.env.EMAIL_APP,
+        to: userMail,
+        subject: 'Notice from Job Finder page',
+        html: note
+    };
+    if (link)
+    {
+        mailOptions.html = note + ` <br>
+        View company information <a href='${process.env.URL_REACT}/${link}'>Here</a> `
+    }
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+        } else {
+        }
+    });
+}
 let checkCompany = (name, id = null) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -44,7 +71,7 @@ let handleCreateNewCompany = (data) => {
         try {
             resolve({
                 errCode: 2,
-                errMessage: 'Tên công ty đã tồn tại'
+                errMessage: 'Company name already exists'
             })
             if (!data.name || !data.phonenumber || !data.address
                 || !data.descriptionHTML || !data.descriptionMarkdown
@@ -108,14 +135,14 @@ let handleCreateNewCompany = (data) => {
                         await account.save()
                         resolve({
                             errCode: 0,
-                            errMessage: 'Đã tạo công ty thành công',
+                            errMessage: 'Successfully created company',
                             companyId : company.id
                         })
                     }
                     else {
                         resolve({
                             errCode: 2,
-                            errMessage: 'Không tìm thấy người dùng'
+                            errMessage: 'User not found'
                         })
                     }
                 }
@@ -137,7 +164,7 @@ let handleUpdateCompany = (data) => {
                 if (await checkCompany(data.name, data.id)) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Tên công ty đã tồn tại'
+                        errMessage: 'Company name already exists'
                     })
                 }
                 else {
@@ -187,20 +214,20 @@ let handleUpdateCompany = (data) => {
                             await res.save();
                             resolve({
                                 errCode: 0,
-                                errMessage: 'Đã sửa thông tin công ty thành công'
+                                errMessage: 'Company information edited successfully'
                             })
                         }
                         else {
                             resolve({
                                 errCode: 2,
-                                errMessage: 'Công ty bạn đã bị chặn không thể thay đổi thông tin'
+                                errMessage: 'Your company has been blocked from changing information.'
                             })
                         }
                     }
                     else {
                         resolve({
                             errCode: 2,
-                            errMessage: 'Không tìm thấy công ty'
+                            errMessage: 'Company not found'
                         })
                     }
                 }
@@ -211,8 +238,133 @@ let handleUpdateCompany = (data) => {
         }
     })
 }
+let handleBanCompany = (companyId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundCompany = await db.Company.findOne({
+                    where: { id: companyId },
+                    raw: false
+                })
+                if (!foundCompany) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Company does not exist`
+                    })
+                }
+                foundCompany.statusCode = 'S2'
+                await foundCompany.save()
+                resolve({
+                    errCode: 0,
+                    message: `Company operations have been discontinued`
+                })
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let handleUnBanCompany = (companyId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundCompany = await db.Company.findOne({
+                    where: { id: companyId },
+                    raw: false
+                })
+                if (!foundCompany) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Company does not exist`
+                    })
+                }
+                else {
+                    foundCompany.statusCode = 'S1'
+                    await foundCompany.save()
+                    resolve({
+                        errCode: 0,
+                        message: `Opened operations for the company`
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let handleAccecptCompany = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundCompany = await db.Company.findOne({
+                    where: { id: data.companyId },
+                    raw: false
+                })
+                if (foundCompany) {
+                    if (data.note == 'null')
+                    {
+                        foundCompany.censorCode = "CS1"
+                    }
+                    else {
+                        foundCompany.censorCode = "CS2"
+                    }
+                    await foundCompany.save()
+                    let note = data.note != 'null' ? data.note : `Company ${foundCompany.name} của bạn đã kiểm duyệt thành công`
+                    let user = await db.User.findOne({
+                        where: { id: foundCompany.userId },
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    if (data.note != 'null') {
+                        sendmail(`Your company was rejected because: ${note}`, user.email,"admin/edit-company")
+                    }
+                    else {
+                        sendmail(`Your company has been successfully verified.`,user.email,`detail-company/${foundCompany.id}`)
+                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: data.note != 'null' ? "Returned to pending status" : "Company approved successfully"
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'No posts exist'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
+    handleBanCompany: handleBanCompany,
+    handleUnBanCompany: handleUnBanCompany,
+    handleAccecptCompany: handleAccecptCompany
 
 }

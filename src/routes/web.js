@@ -32,6 +32,9 @@ let initWebRoutes = (app) => {
     //==================API COMPANY=========================//
     router.post('/api/create-new-company', middlewareControllers.verifyTokenUser,companyController.handleCreateNewCompany)
     router.put('/api/update-company', middlewareControllers.verifyTokenUser,companyController.handleUpdateCompany)
+    router.put('/api/ban-company', middlewareControllers.verifyTokenAdmin ,companyController.handleBanCompany)
+    router.put('/api/unban-company', middlewareControllers.verifyTokenAdmin ,companyController.handleUnBanCompany)
+    router.put('/api/accecpt-company', middlewareControllers.verifyTokenAdmin ,companyController.handleAccecptCompany)
 
     return app.use("/", router);
 }
