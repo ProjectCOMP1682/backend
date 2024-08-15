@@ -444,6 +444,74 @@ let getAllCompanyByAdmin = (data) => {
 
 
 }
+let handleAddUserCompany = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.phonenumber || !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let company = await db.Company.findOne({ where: { id: data.companyId } })
+                if (company) {
+                    let isExist = await checkUserPhone(data.phonenumber);
+                    if (isExist) {
+                        let account = await db.Account.findOne({
+                            where: {
+                                phonenumber: data.phonenumber
+                            },
+                            raw: false
+                        })
+                        if (account.roleCode != 'EMPLOYER') {
+                            resolve({
+                                errCode: 1,
+                                errMessage: 'The account is not an employer'
+                            })
+                        } else {
+                            let user = await db.User.findOne({
+                                where: { id: account.userId },
+                                attributes: {
+                                    exclude: ['userId']
+                                },
+                                raw: false
+                            })
+                            if (user.companyId) {
+                                resolve({
+                                    errCode: 3,
+                                    errMessage: 'Employees have company'
+                                })
+                            }
+                            else {
+                                user.companyId = data.companyId
+                                await user.save()
+                                resolve({
+                                    errCode: 0,
+                                    errMessage: 'Added employee to company'
+                                })
+                            }
+                        }
+
+
+                    } else {
+                        resolve({
+                            errCode: 2,
+                            errMessage: 'Phone number does not exist!'
+                        })
+                    }
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Company does not exist !'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
@@ -452,5 +520,6 @@ module.exports = {
     handleAccecptCompany: handleAccecptCompany,
     getListCompany: getListCompany,
     getAllCompanyByAdmin: getAllCompanyByAdmin,
+    handleAddUserCompany: handleAddUserCompany,
 
 }
