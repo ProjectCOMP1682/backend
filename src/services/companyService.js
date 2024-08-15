@@ -321,7 +321,7 @@ let handleAccecptCompany = (data) => {
                     raw: false
                 })
                 if (foundCompany) {
-                    if (data.note == 'null')
+                    if (data.note == null)
                     {
                         foundCompany.censorCode = "CS1"
                     }
@@ -329,14 +329,15 @@ let handleAccecptCompany = (data) => {
                         foundCompany.censorCode = "CS2"
                     }
                     await foundCompany.save()
-                    let note = data.note != 'null' ? data.note : `Company ${foundCompany.name} của bạn đã kiểm duyệt thành công`
+                    let note = data.note != null ? data.note : `Company ${foundCompany.name} của bạn đã kiểm duyệt thành công`
                     let user = await db.User.findOne({
                         where: { id: foundCompany.userId },
                         attributes: {
                             exclude: ['userId']
                         }
                     })
-                    if (data.note != 'null') {
+
+                    if (data.note != null) {
                         sendmail(`Your company was rejected because: ${note}`, user.email,"admin/edit-company")
                     }
                     else {
@@ -344,17 +345,48 @@ let handleAccecptCompany = (data) => {
                     }
                     resolve({
                         errCode: 0,
-                        errMessage: data.note != 'null' ? "Returned to pending status" : "Company approved successfully"
+                        errMessage: data.note != null ? "Returned to pending status" : "Company approved successfully"
                     })
                 }
                 else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'No posts exist'
+                        errMessage: 'No company exist'
                     })
                 }
             }
 
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let getListCompany = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.limit || !data.offset) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let objectFilter = {
+                    offset: +data.offset,
+                    limit: +data.limit,
+                    where: {statusCode : 'S1'}
+                }
+                if (data.search) {
+                    objectFilter.where = { ...objectFilter.where,
+                        name: {[Op.like]: `%${data.search}%`}
+                    }
+                }
+                let company = await db.Company.findAndCountAll(objectFilter)
+                resolve({
+                    errCode: 0,
+                    data: company.rows,
+                    count: company.count
+                })
+            }
         } catch (error) {
             reject(error)
         }
@@ -366,5 +398,6 @@ module.exports = {
     handleBanCompany: handleBanCompany,
     handleUnBanCompany: handleUnBanCompany,
     handleAccecptCompany: handleAccecptCompany
+    getListCompany: getListCompany,
 
 }

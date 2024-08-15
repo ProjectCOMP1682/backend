@@ -60,11 +60,24 @@ let handleAccecptCompany = async (req, res) => {
         })
     }
 }
+let getListCompany = async (req, res) => {
+    try {
+        let data = await companyService.getListCompany(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
     handleBanCompany: handleBanCompany,
     handleUnBanCompany: handleUnBanCompany,
     handleAccecptCompany : handleAccecptCompany
+    getListCompany: getListCompany,
 
 }

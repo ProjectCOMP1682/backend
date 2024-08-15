@@ -35,6 +35,7 @@ let initWebRoutes = (app) => {
     router.put('/api/ban-company', middlewareControllers.verifyTokenAdmin ,companyController.handleBanCompany)
     router.put('/api/unban-company', middlewareControllers.verifyTokenAdmin ,companyController.handleUnBanCompany)
     router.put('/api/accecpt-company', middlewareControllers.verifyTokenAdmin ,companyController.handleAccecptCompany)
+    router.get('/api/get-list-company', companyController.getListCompany)
 
     return app.use("/", router);
 }
