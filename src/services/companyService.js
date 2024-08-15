@@ -392,12 +392,65 @@ let getListCompany = (data) => {
         }
     })
 }
+let getAllCompanyByAdmin = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.limit || data.offset === '') {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let objectFilter = {
+                    order: [['updatedAt', 'DESC']],
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    attributes: {
+                        exclude: ['detailPostId']
+                    },
+                    nest: true,
+                    raw: true,
+                    include: [
+                        { model: db.Allcode, as: 'statusCompanyData', attributes: ['value', 'code'] },
+                        { model: db.Allcode, as: 'censorData', attributes: ['value', 'code'] }
+                    ]
+                }
+                if (data.search) {
+                    objectFilter.where = {
+                        [Op.or]: [
+                            {
+                                name: {[Op.like]: `%${data.search}%`}
+                            },
+                            {
+                                id: {[Op.like]: `%${data.search}%`}
+                            }
+                        ]
+                    }
+                }
+                if (data.censorCode){
+                    objectFilter.where = {...objectFilter.where, censorCode: data.censorCode}
+                }
+                let company = await db.Company.findAndCountAll(objectFilter)
+                resolve({
+                    errCode: 0,
+                    data: company.rows,
+                    count: company.count
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+
+
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
     handleBanCompany: handleBanCompany,
     handleUnBanCompany: handleUnBanCompany,
-    handleAccecptCompany: handleAccecptCompany
+    handleAccecptCompany: handleAccecptCompany,
     getListCompany: getListCompany,
+    getAllCompanyByAdmin: getAllCompanyByAdmin,
 
 }
