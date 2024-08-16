@@ -96,6 +96,18 @@ let handleAddUserCompany = async (req, res) => {
         })
     }
 }
+let getDetailCompanyByUserId = async (req, res) => {
+    try {
+        let data = await companyService.getDetailCompanyByUserId(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
@@ -105,5 +117,6 @@ module.exports = {
     getListCompany: getListCompany,
     getAllCompanyByAdmin: getAllCompanyByAdmin,
     handleAddUserCompany: handleAddUserCompany,
+    getDetailCompanyByUserId: getDetailCompanyByUserId,
 
 }

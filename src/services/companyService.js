@@ -512,6 +512,53 @@ let handleAddUserCompany = (data) => {
         }
     })
 }
+let getDetailCompanyByUserId = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.userId && !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let company
+                if (data.userId !== 'null') {
+                    let user = await db.User.findOne({
+                        where: {id: data.userId},
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    company = await db.Company.findOne({
+                        where : {id: user.companyId}
+                    })
+                }
+                else {
+                    company = await db.Company.findOne({
+                        where: { id: data.companyId }
+                    })
+                }
+                if (!company) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: "Không tìm thấy công ty người dùng sở hữu"
+                    })
+                }
+                else {
+                    if (company.file) {
+                        company.file = new Buffer(company.file,'base64').toString('binary')
+                    }
+                    resolve({
+                        errCode: 0,
+                        data: company,
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
@@ -521,5 +568,6 @@ module.exports = {
     getListCompany: getListCompany,
     getAllCompanyByAdmin: getAllCompanyByAdmin,
     handleAddUserCompany: handleAddUserCompany,
+    getDetailCompanyByUserId: getDetailCompanyByUserId,
 
 }

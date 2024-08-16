@@ -38,6 +38,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-list-company', companyController.getListCompany)
     router.get('/api/get-all-company', middlewareControllers.verifyTokenAdmin ,companyController.getAllCompanyByAdmin)
     router.put('/api/add-user-company', middlewareControllers.verifyTokenUser,companyController.handleAddUserCompany)
+    router.get('/api/get-detail-company-by-userId',companyController.getDetailCompanyByUserId)
 
     return app.use("/", router);
 }
