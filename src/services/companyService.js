@@ -559,6 +559,49 @@ let getDetailCompanyByUserId = (data) => {
         }
     })
 }
+let getAllUserByCompanyId = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.limit || !data.offset || !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter !'
+                })
+            } else {
+
+                let res = await db.User.findAndCountAll({
+                    where: { companyId: data.companyId },
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    attributes: {
+                        exclude: ['password', 'userId']
+                    },
+                    include: [
+                        { model: db.Allcode, as: 'genderData', attributes: ['value', 'code'] },
+                        {
+                            model: db.Account, as: 'userAccountData', attributes: {
+                                exclude: ['password']
+                            }, include: [
+                                { model: db.Allcode, as: 'roleData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'statusAccountData', attributes: ['value', 'code'] }
+                            ]
+                        }
+                    ],
+                    raw: true,
+                    nest: true
+                })
+                resolve({
+                    errCode: 0,
+                    data: res.rows,
+                    count: res.count
+                })
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
@@ -569,5 +612,6 @@ module.exports = {
     getAllCompanyByAdmin: getAllCompanyByAdmin,
     handleAddUserCompany: handleAddUserCompany,
     getDetailCompanyByUserId: getDetailCompanyByUserId,
+    getAllUserByCompanyId: getAllUserByCompanyId,
 
 }
