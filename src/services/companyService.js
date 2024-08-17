@@ -602,82 +602,7 @@ let getAllUserByCompanyId = (data) => {
         }
     })
 }
-let getDetailCompanyById = (id) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!id) {
-                resolve({
-                    errCode: 1,
-                    errMessage: 'Missing required parameters !'
-                })
-            } else {
 
-                let company = await db.Company.findOne({
-                    where: { id: id },
-                    include: [
-                        { model: db.Allcode, as: 'censorData', attributes: ['value', 'code'] },
-                    ],
-                    nest: true,
-                    raw: true
-                })
-                if (!company) {
-                    resolve({
-                        errCode: 0,
-                        errorMessage: 'Không tồn tại công ty',
-                    })
-                }
-                else {
-                    let listUserOfCompany = await db.User.findAll({
-                        where: { companyId: company.id },
-                        attributes: ['id'],
-                    })
-                    listUserOfCompany = listUserOfCompany.map(item => {
-                        return {
-                            userId: item.id
-                        }
-                    })
-                    company.postData = await db.Post.findAll({
-                        where: {
-                            [Op.and]: [{ statusCode: 'PS1' }, { [Op.or]: listUserOfCompany }]
-                        },
-                        order: [['createdAt', 'DESC']],
-                        limit: 5,
-                        offset: 0,
-                        attributes: {
-                            exclude: ['detailPostId']
-                        },
-                        nest: true,
-                        raw: true,
-                        include: [
-                            {
-                                model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
-                                include: [
-                                    { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
-                                    { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] },
-                                ]
-                            },
-                        ]
-                    })
-                    if (company.file)
-                    {
-                        company.file = new Buffer(company.file, 'base64').toString('binary')
-                    }
-                    resolve({
-                        errCode: 0,
-                        data: company,
-                    })
-                }
-            }
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
 let handleQuitCompany = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -735,6 +660,42 @@ let handleQuitCompany = (data) => {
         }
     })
 }
+let getDetailCompanyById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+
+                let company = await db.Company.findOne({
+                    where: { id: id },
+                    include: [
+                        { model: db.Allcode, as: 'censorData', attributes: ['value', 'code'] },
+                    ],
+                    nest: true,
+                    raw: true
+                })
+                if (!company) {
+                    resolve({
+                        errCode: 0,
+                        errorMessage: 'Company does not exist',
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 0,
+                        data: company,
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewCompany: handleCreateNewCompany,
     handleUpdateCompany: handleUpdateCompany,
@@ -747,5 +708,6 @@ module.exports = {
     getDetailCompanyByUserId: getDetailCompanyByUserId,
     getAllUserByCompanyId: getAllUserByCompanyId,
     handleQuitCompany: handleQuitCompany,
+    getDetailCompanyById: getDetailCompanyById,
 
 }

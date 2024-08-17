@@ -41,6 +41,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-company-by-userId',companyController.getDetailCompanyByUserId)
     router.get('/api/get-all-user-by-companyId', middlewareControllers.verifyTokenUser,companyController.getAllUserByCompanyId)
     router.put('/api/quit-company', middlewareControllers.verifyTokenUser,companyController.handleQuitCompany)
+    router.get('/api/get-detail-company-by-id', companyController.getDetailCompanyById)
 
     return app.use("/", router);
 }
