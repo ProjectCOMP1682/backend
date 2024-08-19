@@ -2,6 +2,7 @@ import express from "express";
 import userController from '../controllers/userController';
 import allcodeController from '../controllers/allcodeController';
 import companyController from '../controllers/companyController';
+import postController from '../controllers/postController';
 
 
 import middlewareControllers from '../middlewares/jwtVerify'
@@ -42,6 +43,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-user-by-companyId', middlewareControllers.verifyTokenUser,companyController.getAllUserByCompanyId)
     router.put('/api/quit-company', middlewareControllers.verifyTokenUser,companyController.handleQuitCompany)
     router.get('/api/get-detail-company-by-id', companyController.getDetailCompanyById)
+    //==================API POST==========================//
+    router.post('/api/create-new-post', middlewareControllers.verifyTokenUser,postController.handleCreateNewPost)
 
     return app.use("/", router);
 }

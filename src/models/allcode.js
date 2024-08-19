@@ -11,7 +11,19 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
 
-    
+            //detailpost
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'categoryJobCode', as: 'jobTypePostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'categoryWorktypeCode', as: 'workTypePostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'salaryJobCode', as: 'salaryTypePostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'categoryJoblevelCode', as: 'jobLevelPostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'experienceJobCode', as: 'expTypePostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'genderPostCode', as: 'genderPostData' })
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'addressCode', as: 'provincePostData' })
+
+
+
+            //post
+            Allcode.hasMany(models.DetailPost, { foreignKey: 'statusCode', as: 'statusPostData' })
 
             //account
             Allcode.hasMany(models.Account, { foreignKey: 'roleCode', as: 'roleData' })
