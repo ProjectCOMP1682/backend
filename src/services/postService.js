@@ -26,7 +26,7 @@ let handleCreateNewPost = (data) => {
                 if (!company) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Người dùng không thuộc công ty'
+                        errMessage: 'User is not affiliated with the company'
                     })
                     return
                 }
@@ -40,7 +40,7 @@ let handleCreateNewPost = (data) => {
                             else {
                                 resolve({
                                     errCode: 2,
-                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết nổi bật'
+                                    errMessage: 'Your company has run out of featured posts.'
                                 })
                                 return
                             }
@@ -53,7 +53,7 @@ let handleCreateNewPost = (data) => {
                             else {
                                 resolve({
                                     errCode: 2,
-                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết bình thường'
+                                    errMessage: 'Your company has run out of normal posting times.'
                                 })
                                 return
                             }
@@ -80,13 +80,13 @@ let handleCreateNewPost = (data) => {
                         })
                         resolve({
                             errCode: 0,
-                            errMessage: 'Tạo bài tuyển dụng thành công hãy chờ quản trị viên duyệt'
+                            errMessage: 'Successfully created job posting, please wait for admin approval'
                         })
                     }
                     else {
                         resolve({
                             errCode: 2,
-                            errMessage: 'Công ty bạn đã bị chặn không thể đăng bài'
+                            errMessage: 'Your company has been blocked from posting.'
                         })
                     }
                 }
@@ -96,8 +96,86 @@ let handleCreateNewPost = (data) => {
         }
     })
 }
-
+let handleUpdatePost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.name || !data.categoryJobCode || !data.addressCode || !data.salaryJobCode || !data.amount || !data.timeEnd || !data.categoryJoblevelCode
+                || !data.categoryWorktypeCode || !data.experienceJobCode || !data.genderPostCode || !data.descriptionHTML
+                || !data.descriptionMarkdown || !data.id || !data.userId
+            ) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let post = await db.Post.findOne({
+                    where: { id: data.id },
+                    raw: false
+                })
+                if (post) {
+                    let otherPost = await db.Post.findOne({
+                        where: {detailPostId: post.detailPostId,id: {
+                                [Op.ne]: post.id
+                            }}
+                    })
+                    if (otherPost) {
+                        let newDetailPost = await db.DetailPost.create({
+                            name: data.name,
+                            descriptionHTML: data.descriptionHTML,
+                            descriptionMarkdown: data.descriptionMarkdown,
+                            categoryJobCode: data.categoryJobCode,
+                            addressCode: data.addressCode,
+                            salaryJobCode: data.salaryJobCode,
+                            amount: data.amount,
+                            categoryJoblevelCode: data.categoryJoblevelCode,
+                            categoryWorktypeCode: data.categoryWorktypeCode,
+                            experienceJobCode: data.experienceJobCode,
+                            genderPostCode: data.genderPostCode,
+                        })
+                        post.detailPostId = newDetailPost.id
+                    }
+                    else {
+                        let detailPost = await db.DetailPost.findOne({
+                            where: {id: post.detailPostId},
+                            attributes: {
+                                exclude: ['statusCode']
+                            },
+                            raw: false
+                        })
+                        detailPost.name =  data.name,
+                            detailPost.descriptionHTML =  data.descriptionHTML,
+                            detailPost.descriptionMarkdown =  data.descriptionMarkdown,
+                            detailPost.categoryJobCode =  data.categoryJobCode,
+                            detailPost.addressCode =  data.addressCode,
+                            detailPost.salaryJobCode =  data.salaryJobCode,
+                            detailPost.amount =  data.amount,
+                            detailPost.categoryJoblevelCode =  data.categoryJoblevelCode,
+                            detailPost.categoryWorktypeCode =  data.categoryWorktypeCode,
+                            detailPost.experienceJobCode =  data.experienceJobCode,
+                            detailPost.genderPostCode =  data.genderPostCode,
+                            await detailPost.save()
+                    }
+                    post.userId = data.userId
+                    post.statusCode = 'PS3'
+                    await post.save()
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Edited post successfully, please wait for admin approval'
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Post does not exist!'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
+    handleUpdatePost: handleUpdatePost,
 
 }

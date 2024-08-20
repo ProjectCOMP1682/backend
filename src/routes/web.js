@@ -45,6 +45,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-detail-company-by-id', companyController.getDetailCompanyById)
     //==================API POST==========================//
     router.post('/api/create-new-post', middlewareControllers.verifyTokenUser,postController.handleCreateNewPost)
+    router.put('/api/update-post', middlewareControllers.verifyTokenUser,postController.handleUpdatePost)
 
     return app.use("/", router);
 }

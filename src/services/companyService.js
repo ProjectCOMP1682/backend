@@ -329,7 +329,7 @@ let handleAccecptCompany = (data) => {
                         foundCompany.censorCode = "CS2"
                     }
                     await foundCompany.save()
-                    let note = data.note != null ? data.note : `Company ${foundCompany.name} của bạn đã kiểm duyệt thành công`
+                    let note = data.note != null ? data.note : `Company ${foundCompany.name} Your review has been successfully approved`
                     let user = await db.User.findOne({
                         where: { id: foundCompany.userId },
                         attributes: {
@@ -541,7 +541,7 @@ let getDetailCompanyByUserId = (data) => {
                 if (!company) {
                     resolve({
                         errCode: 2,
-                        errMessage: "Không tìm thấy công ty người dùng sở hữu"
+                        errMessage: "User owned company not found"
                     })
                 }
                 else {
