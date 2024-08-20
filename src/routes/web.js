@@ -46,6 +46,7 @@ let initWebRoutes = (app) => {
     //==================API POST==========================//
     router.post('/api/create-new-post', middlewareControllers.verifyTokenUser,postController.handleCreateNewPost)
     router.put('/api/update-post', middlewareControllers.verifyTokenUser,postController.handleUpdatePost)
+    router.put('/api/accept-post', middlewareControllers.verifyTokenAdmin ,postController.handleAcceptPost)
 
     return app.use("/", router);
 }

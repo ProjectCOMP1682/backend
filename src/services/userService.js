@@ -17,14 +17,14 @@ let sendmail = (note, userMail, link = null) => {
     });
 
     let mailOptions = {
-        from: '"FIND JOB" <process.env.EMAIL_APP>',
+        from: '"TOP CV" <process.env.EMAIL_APP>',
         to: userMail,
-        subject: 'Notice from Job Finder page',
+        subject: 'Notice from TOP CV page',
         html: note
     };
     if (link)
     {
-        mailOptions.html = note + ` xem thông tin <a href='${process.env.URL_REACT}/${link}'>Tại đây</a> `
+        mailOptions.html = note + ` View information <a href='${process.env.URL_REACT}/${link}'>Here</a> `
     }
 
     transporter.sendMail(mailOptions, function (error, info) {

@@ -1,7 +1,34 @@
 import db from "../models/index";
 const { Op } = require("sequelize");
 require('dotenv').config();
+var nodemailer = require('nodemailer');
+let sendmail = (note, userMail, link = null) => {
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_APP,
+            pass: process.env.EMAIL_APP_PASSWORD,
+        }
+    });
 
+    var mailOptions = {
+        from: process.env.EMAIL_APP,
+        to: userMail,
+        subject: 'Notice from TOP CV page',
+        html: note
+    };
+    if (link)
+    {
+        mailOptions.html = note + ` <br>
+        View post information <a href='${process.env.URL_REACT}/${link}'>Here</a> `
+    }
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+        } else {
+        }
+    });
+}
 let handleCreateNewPost = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -174,8 +201,62 @@ let handleUpdatePost = (data) => {
         }
     })
 }
+let handleAcceptPost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data.id || !data.statusCode) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundPost = await db.Post.findOne({
+                    where: { id: data.id },
+                    raw: false
+                })
+                if (foundPost) {
+                    foundPost.statusCode = data.statusCode
+                    if (data.statusCode == "PS1") {
+                        foundPost.timePost = new Date().getTime()
+                    }
+                    await foundPost.save()
+                    let note = data.statusCode == "PS1" ? "Post approved successfully" : data.note
+
+                    let user = await db.User.findOne({
+                        where: { id: foundPost.userId },
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    if (data.statusCode == "PS1")
+                    {
+                        sendmail(note, user.email,`detail-job/${foundPost.id}`)
+                    }
+                    else {
+                        sendmail(`Posts #${foundPost.id} Your request has been rejected.`, user.email,`admin/list-post/${foundPost.id}`)
+                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: data.statusCode == "PS1" ? 'Post approved successfully' : 'Post rejected successfully'
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'No posts exist'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
+    handleAcceptPost: handleAcceptPost,
 
 }
