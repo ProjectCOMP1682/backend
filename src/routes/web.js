@@ -47,6 +47,7 @@ let initWebRoutes = (app) => {
     router.post('/api/create-new-post', middlewareControllers.verifyTokenUser,postController.handleCreateNewPost)
     router.put('/api/update-post', middlewareControllers.verifyTokenUser,postController.handleUpdatePost)
     router.put('/api/accept-post', middlewareControllers.verifyTokenAdmin ,postController.handleAcceptPost)
+    router.put('/api/ban-post', middlewareControllers.verifyTokenAdmin ,postController.handleBanPost)
 
     return app.use("/", router);
 }

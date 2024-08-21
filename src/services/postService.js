@@ -254,9 +254,54 @@ let handleAcceptPost = (data) => {
         }
     })
 }
+let handleBanPost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data.postId || !data.note || !data.userId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundPost = await db.Post.findOne({
+                    where: { id: data.postId },
+                    raw: false
+                })
+                if (foundPost) {
+                    foundPost.statusCode = 'PS4'
+                    await foundPost.save()
+
+                    let user = await db.User.findOne({
+                        where: { id: foundPost.userId },
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    sendmail(`Your Posts #${foundPost.id} has been blocked `, user.email,`admin/list-post/${foundPost.id}`)
+
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Post blocked successfully'
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'No posts exist'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
     handleAcceptPost: handleAcceptPost,
+    handleBanPost: handleBanPost,
 
 }
