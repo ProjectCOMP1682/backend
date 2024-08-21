@@ -258,7 +258,7 @@ let handleBanPost = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!data.postId || !data.note || !data.userId) {
+            if (!data.postId || !data.userId) {
                 resolve({
                     errCode: 1,
                     errMessage: `Missing required parameters !`
@@ -278,11 +278,54 @@ let handleBanPost = (data) => {
                             exclude: ['userId']
                         }
                     })
-                    sendmail(`Your Posts #${foundPost.id} has been blocked `, user.email,`admin/list-post/${foundPost.id}`)
+                    sendmail(`Your Posts ${foundPost.id} has been blocked `, user.email,`admin/list-post/${foundPost.id}`)
 
                     resolve({
                         errCode: 0,
                         errMessage: 'Post blocked successfully'
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'No posts exist'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let handleActivePost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data.id || !data.userId ) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let foundPost = await db.Post.findOne({
+                    where: { id: data.id },
+                    raw: false
+                })
+                if (foundPost) {
+                    foundPost.statusCode = 'PS3'
+                    await foundPost.save()
+
+                    let user = await db.User.findOne({
+                        where: { id: foundPost.userId },
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    sendmail(` Your Posts ${foundPost.id} has been actived. `, user.email,`admin/list-post/${foundPost.id}`)
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Pending status reopened'
                     })
                 }
                 else {
@@ -303,5 +346,6 @@ module.exports = {
     handleUpdatePost: handleUpdatePost,
     handleAcceptPost: handleAcceptPost,
     handleBanPost: handleBanPost,
+    handleActivePost: handleActivePost,
 
 }
