@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
             User.hasOne(models.Account, { foreignKey: 'userId', as: 'userAccountData' })
 
 
+            // //Company
+            User.belongsTo(models.Company, { foreignKey: 'companyId', targetKey: 'id', as: 'userCompanyData' })
+            User.hasOne(models.Company, { foreignKey: 'userId', as: 'companyUserData' })
+
 
         }
     };

@@ -49,6 +49,7 @@ let initWebRoutes = (app) => {
     router.put('/api/accept-post', middlewareControllers.verifyTokenAdmin ,postController.handleAcceptPost)
     router.put('/api/ban-post', middlewareControllers.verifyTokenAdmin ,postController.handleBanPost)
     router.put('/api/active-post', middlewareControllers.verifyTokenAdmin ,postController.handleActivePost)
+    router.get('/api/get-list-post-admin', middlewareControllers.verifyTokenUser,postController.getListPostByAdmin)
 
     return app.use("/", router);
 }

@@ -341,11 +341,93 @@ let handleActivePost = (data) => {
         }
     })
 }
+let getListPostByAdmin = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.limit || !data.offset || !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let company = await db.Company.findOne({
+                    where: { id: data.companyId }
+                })
+                if (!company) {
+                    resolve({
+                        errCode: 2,
+                        errorMessage: 'The company does not exist',
+                    })
+                }
+                else {
+                    let listUserOfCompany = await db.User.findAll({
+                        where: { companyId: company.id },
+                        attributes: ['id'],
+                    })
+                    listUserOfCompany = listUserOfCompany.map(item => {
+                        return {
+                            userId: item.id
+                        }
+                    })
+                    let objectFilter = {
+                        where: {
+                            [Op.and]: [{ [Op.or]: listUserOfCompany }]
+                        },
+                        order: [['updatedAt', 'DESC']],
+                        limit: +data.limit,
+                        offset: +data.offset,
+                        attributes: {
+                            exclude: ['detailPostId']
+                        },
+                        nest: true,
+                        raw: true,
+                        include: [
+                            {
+                                model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
+                                include: [
+                                    { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
+                                    { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] }
+                                ]
+                            },
+                            { model: db.Allcode, as: 'statusPostData', attributes: ['value', 'code'] },
+                            { model: db.User, as: 'userPostData',
+                                attributes: {
+                                    exclude: ['userId']
+                                },
+                                include: [
+                                    {model : db.Company, as: 'userCompanyData'}
+                                ]
+                            }
+                        ]
+                    }
+
+                    let post = await db.Post.findAndCountAll(objectFilter)
+                    resolve({
+                        errCode: 0,
+                        data: post.rows,
+                        count: post.count
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+
+
+}
+
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
     handleAcceptPost: handleAcceptPost,
     handleBanPost: handleBanPost,
     handleActivePost: handleActivePost,
+    getListPostByAdmin: getListPostByAdmin,
 
 }
