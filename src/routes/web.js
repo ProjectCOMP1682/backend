@@ -50,6 +50,7 @@ let initWebRoutes = (app) => {
     router.put('/api/ban-post', middlewareControllers.verifyTokenAdmin ,postController.handleBanPost)
     router.put('/api/active-post', middlewareControllers.verifyTokenAdmin ,postController.handleActivePost)
     router.get('/api/get-list-post-admin', middlewareControllers.verifyTokenUser,postController.getListPostByAdmin)
+    router.get('/api/get-all-post-admin', middlewareControllers.verifyTokenUser,postController.getAllPostByAdmin)
 
     return app.use("/", router);
 }

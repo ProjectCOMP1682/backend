@@ -421,7 +421,63 @@ let getListPostByAdmin = (data) => {
 
 
 }
+let getAllPostByAdmin = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.limit || !data.offset) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let objectFilter = {
+                    order: [['updatedAt', 'DESC']],
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    attributes: {
+                        exclude: ['detailPostId']
+                    },
+                    nest: true,
+                    raw: true,
+                    include: [
+                        {
+                            model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
+                            include: [
+                                { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] }
+                            ]
+                        },
+                        { model: db.Allcode, as: 'statusPostData', attributes: ['value', 'code'] },
+                        {
+                            model: db.User, as: 'userPostData', attributes: { exclude: ['userId'] },
+                            include: [
+                                { model: db.Company, as: 'userCompanyData' }
+                            ]
+                        }
+                    ],
+                    order: [['updatedAt', 'DESC']],
+                }
 
+
+                let post = await db.Post.findAndCountAll(objectFilter)
+                resolve({
+                    errCode: 0,
+                    data: post.rows,
+                    count: post.count
+                })
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+
+
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -429,5 +485,6 @@ module.exports = {
     handleBanPost: handleBanPost,
     handleActivePost: handleActivePost,
     getListPostByAdmin: getListPostByAdmin,
+    getAllPostByAdmin: getAllPostByAdmin,
 
 }
