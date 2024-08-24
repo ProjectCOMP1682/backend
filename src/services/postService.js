@@ -478,6 +478,67 @@ let getAllPostByAdmin = (data) => {
 
 
 }
+let getDetailPostById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let post = await db.Post.findOne({
+                    where: {
+                        id: id
+                    },
+                    attributes: {
+                        exclude: ['detailPostId']
+                    },
+                    nest: true,
+                    raw: true,
+                    include: [
+                        {
+                            model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
+                            include: [
+                                { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
+                                { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] }
+                            ]
+                        }
+                    ]
+                })
+                if (post) {
+                    let user = await db.User.findOne({
+                        where: { id: post.userId },
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    let company = await db.Company.findOne({
+                        where: { id: user.companyId }
+                    })
+                    post.companyData = company
+                    resolve({
+                        errCode: 0,
+                        data: post,
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'No posts found'
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -486,5 +547,6 @@ module.exports = {
     handleActivePost: handleActivePost,
     getListPostByAdmin: getListPostByAdmin,
     getAllPostByAdmin: getAllPostByAdmin,
+    getDetailPostById: getDetailPostById,
 
 }
