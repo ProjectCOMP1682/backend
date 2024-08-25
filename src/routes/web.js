@@ -52,6 +52,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-list-post-admin', middlewareControllers.verifyTokenUser,postController.getListPostByAdmin)
     router.get('/api/get-all-post-admin', middlewareControllers.verifyTokenUser,postController.getAllPostByAdmin)
     router.get('/api/get-detail-post-by-id', postController.getDetailPostById)
+    router.get('/api/get-filter-post', postController.getFilterPost)
 
     return app.use("/", router);
 }

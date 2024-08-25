@@ -539,6 +539,121 @@ let getDetailPostById = (id) => {
         }
     })
 }
+let getFilterPost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let objectFilter = ''
+            if (data.salaryJobCode !== '' || data.categoryWorktypeCode !== '' || data.experienceJobCode !== '' || data.categoryJoblevelCode !== '') {
+                let querySalaryJob = ''
+                if (data.salaryJobCode !== '')
+                    querySalaryJob = data.salaryJobCode.split(',').map((data, index) => {
+                        return { salaryJobCode: data }
+                    })
+
+                let queryWorkType = ''
+                if (data.categoryWorktypeCode !== '')
+                    queryWorkType = data.categoryWorktypeCode.split(',').map((data, index) => {
+                        return { categoryWorktypeCode: data }
+                    })
+
+                let queryExpType = ''
+                if (data.experienceJobCode !== '')
+                    queryExpType = data.experienceJobCode.split(',').map((data, index) => {
+                        return { experienceJobCode: data }
+                    })
+                let queryJobLevel = ''
+                if (data.categoryJoblevelCode !== '')
+                    queryJobLevel = data.categoryJoblevelCode.split(',').map((data, index) => {
+                        return { categoryJoblevelCode: data }
+                    })
+                objectFilter = {
+                    where: {
+                        [Op.and]: [
+                            queryExpType && { [Op.or]: [...queryExpType] },
+                            queryWorkType && { [Op.or]: [...queryWorkType] },
+                            querySalaryJob && { [Op.or]: [...querySalaryJob] },
+                            queryJobLevel && { [Op.or]: [...queryJobLevel] }
+                        ]
+                    },
+                    raw: true,
+                    nest: true,
+                    attributes: {
+                        exclude: ['statusCode']
+                    }
+                }
+            }
+            else {
+                objectFilter = {
+                    raw: true,
+                    nest: true,
+                    attributes: {
+                        exclude: ['statusCode']
+                    }
+                }
+            }
+            if (data.categoryJobCode && data.categoryJobCode !== '') objectFilter.where = { ...objectFilter.where, categoryJobCode: data.categoryJobCode }
+            if (data.addressCode && data.addressCode !== '') objectFilter.where = { ...objectFilter.where, addressCode: data.addressCode }
+            if (data.search) objectFilter.where = {...objectFilter.where,name: {[Op.like] : `%${data.search}%`}}
+            let listDetailPost = await db.DetailPost.findAll(objectFilter)
+            let listDetailPostId = listDetailPost.map(item => {
+                return {
+                    detailPostId: item.id
+                }
+            })
+
+            let postFilter = {
+                where: {
+                    statusCode: 'PS1',
+                    [Op.or]: listDetailPostId,
+                },
+                order: [['timePost', 'DESC']],
+                include: [
+                    {
+                        model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
+                        include: [
+                            { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
+                            { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] }
+                        ]
+                    },
+                    {
+                        model: db.User, as: 'userPostData',
+                        attributes: {
+                            exclude: ['userId']
+                        },
+                        include: [
+                            { model: db.Company, as: 'userCompanyData'},
+                        ]
+                    }
+                ],
+                raw: true,
+                nest: true
+            }
+            if (data.limit && data.offset) {
+                postFilter.limit = +data.limit
+                postFilter.offset = +data.offset
+            }
+            if (data.isHot == 1) {
+                postFilter.where = { ...postFilter.where, isHot: data.isHot }
+            }
+            let res = await db.Post.findAndCountAll(postFilter)
+
+            resolve({
+                errCode: 0,
+                data: res.rows,
+                count: res.count
+            })
+
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -548,5 +663,6 @@ module.exports = {
     getListPostByAdmin: getListPostByAdmin,
     getAllPostByAdmin: getAllPostByAdmin,
     getDetailPostById: getDetailPostById,
+    getFilterPost: getFilterPost,
 
 }
