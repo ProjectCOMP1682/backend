@@ -3,6 +3,7 @@ import userController from '../controllers/userController';
 import allcodeController from '../controllers/allcodeController';
 import companyController from '../controllers/companyController';
 import postController from '../controllers/postController';
+import cvController from '../controllers/cvController'
 
 
 import middlewareControllers from '../middlewares/jwtVerify'
@@ -53,7 +54,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-post-admin', middlewareControllers.verifyTokenUser,postController.getAllPostByAdmin)
     router.get('/api/get-detail-post-by-id', postController.getDetailPostById)
     router.get('/api/get-filter-post', postController.getFilterPost)
-
+    //==================API CV==========================//
+    router.post('/api/create-new-cv', middlewareControllers.verifyTokenUser,cvController.handleCreateNewCV)
     return app.use("/", router);
 }
 

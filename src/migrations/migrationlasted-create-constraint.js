@@ -1,6 +1,26 @@
 module.exports = {
   up: (queryInterface, Sequelize) => new Promise((resolve, reject) => {
     {
+      queryInterface.addConstraint('Cvs', {
+        type: 'foreign key',
+        fields: ['postId'],
+        name: 'FK_Cvs_Posts',
+        references: {
+          table: 'Posts',
+          field: 'id',
+        },
+        onUpdate: "CASCADE",
+      })
+      queryInterface.addConstraint('Cvs', {
+        type: 'foreign key',
+        fields: ['userId'],
+        name: 'FK_Cvs_Users',
+        references: {
+          table: 'Users',
+          field: 'id',
+        },
+        onUpdate: "CASCADE",
+      })
       queryInterface.addConstraint('Posts', {
         type: 'foreign key',
         fields: ['userId'],
@@ -31,6 +51,7 @@ module.exports = {
         },
         onUpdate: "CASCADE",
       })
+
       queryInterface.addConstraint('Accounts', {
         type: 'foreign key',
         fields: ['userId'],
@@ -61,7 +82,8 @@ module.exports = {
       queryInterface.removeConstraint('Users', 'FK_Users_Companies')
       queryInterface.removeConstraint('Posts', 'FK_Posts_Users')
       queryInterface.removeConstraint('Posts','FK_Posts_DetailPosts')
-
+      queryInterface.removeConstraint('Cvs', 'FK_Cvs_Posts')
+      queryInterface.removeConstraint('Cvs', 'FK_Cvs_Users')
 
     }
   })
