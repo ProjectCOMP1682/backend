@@ -56,6 +56,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-filter-post', postController.getFilterPost)
     //==================API CV==========================//
     router.post('/api/create-new-cv', middlewareControllers.verifyTokenUser,cvController.handleCreateNewCV)
+    router.get('/api/get-all-list-cv-by-post',cvController.getAllListCvByPost)
+
     return app.use("/", router);
 }
 
