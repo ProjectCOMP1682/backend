@@ -20,7 +20,14 @@ module.exports = (sequelize, DataTypes) => {
             // //Company
             User.belongsTo(models.Company, { foreignKey: 'companyId', targetKey: 'id', as: 'userCompanyData' })
             User.hasOne(models.Company, { foreignKey: 'userId', as: 'companyUserData' })
+            // //Cv
+            User.hasMany(models.Cv, { foreignKey: 'userId', as: 'userCvData' })
 
+            //UserSetting
+            User.hasOne(models.UserSetting, { foreignKey: 'userId', as: 'userSettingData' })
+
+            //UserSkill - Skill
+            User.belongsToMany(models.Skill, { through: models.UserSkill});
 
         }
     };

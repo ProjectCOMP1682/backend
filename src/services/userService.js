@@ -526,6 +526,79 @@ let getDetailUserById = (userid) => {
         }
     })
 }
+let setDataUserSetting = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id || !data.data) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters!'
+                })
+            } else {
+                let user = await db.User.findOne({
+                    where: {id: data.id},
+                    attributes: {
+                        exclude: ['userId']
+                    },
+                })
+                if (user) {
+                    let userSetting = await db.UserSetting.findOne({
+                        where: {userId: user.id},
+                        raw: false,
+                    })
+                    if (userSetting) {
+                        userSetting.salaryJobCode = data.data.salaryJobCode
+                        userSetting.categoryJobCode = data.data.categoryJobCode
+                        userSetting.addressCode = data.data.addressCode
+                        userSetting.experienceJobCode = data.data.experienceJobCode
+                        userSetting.isTakeMail = data.data.isTakeMail
+                        userSetting.isFindJob = data.data.isFindJob
+                        userSetting.file = data.data.file
+                        await userSetting.save()
+                    }
+                    else {
+                        let params = {
+                            salaryJobCode: data.data.salaryJobCode,
+                            categoryJobCode : data.data.categoryJobCode,
+                            addressCode : data.data.addressCode,
+                            experienceJobCode : data.data.experienceJobCode,
+                            file : data.data.file,
+                            userId: user.id
+                        }
+                        if (data.data.isTakeMail) params.isTakeMail = data.data.isTakeMail
+                        if (data.data.isFindJob) params.isFindJob = data.data.isFindJob
+                        await db.UserSetting.create(params)
+                    }
+                    if (data.data.listSkills && Array.isArray(data.data.listSkills)) {
+                        await db.UserSkill.destroy({
+                            where: {userId: user.id}
+                        })
+                        let objUserSkill = data.data.listSkills.map(item=>{
+                            return {
+                                UserId: user.id,
+                                SkillId: item
+                            }
+                        })
+                        await db.UserSkill.bulkCreate(objUserSkill)
+                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: "The system has recorded your selection"
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: "User does not exist"
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     handleCreateNewUser: handleCreateNewUser,
     updateUserData: updateUserData,
@@ -537,5 +610,6 @@ module.exports = {
     changePaswordByPhone: changePaswordByPhone,
     getAllUser: getAllUser,
     getDetailUserById: getDetailUserById,
+    setDataUserSetting:setDataUserSetting,
 
 }
