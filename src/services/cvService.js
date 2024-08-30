@@ -136,8 +136,45 @@ let getAllListCvByPost = (data) => {
         }
     })
 }
+let getDetailCvById = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.cvId || !data.roleCode) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let cv = await db.Cv.findOne({
+                    where: { id: data.cvId },
+                    raw: false,
+                    nest: true,
+                    include: [
+                        {
+                            model: db.User, as: 'userCvData',
+                            attributes: {
+                                exclude: ['userId', 'file', 'companyId']
+                            }
+                        }
+                    ]
+                })
+                if (cv.file) {
+                    cv.file = new Buffer.from(cv.file, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    data: cv,
+                })
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+}
+
 module.exports = {
     handleCreateCv: handleCreateCv,
     getAllListCvByPost: getAllListCvByPost,
+    getDetailCvById: getDetailCvById,
 
 }
