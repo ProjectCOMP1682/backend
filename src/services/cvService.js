@@ -171,10 +171,61 @@ let getDetailCvById = (data) => {
         }
     })
 }
+let getAllCvByUserId = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.userId || !data.limit || !data.offset) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let cv = await db.Cv.findAndCountAll({
+                    where: { userId: data.userId },
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    raw: true,
+                    nest: true,
+                    order: [['createdAt', 'DESC']],
+                    attributes: {
+                        exclude: ['file']
+                    },
+                    include: [
+                        {
+                            model: db.Post, as: 'postCvData',
+                            include: [
+                                {
+                                    model: db.DetailPost, as: 'postDetailData', attributes: ['id', 'name', 'descriptionHTML', 'descriptionMarkdown', 'amount'],
+                                    include: [
+                                        { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'workTypePostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'salaryTypePostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'jobLevelPostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'genderPostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'provincePostData', attributes: ['value', 'code'] },
+                                        { model: db.Allcode, as: 'expTypePostData', attributes: ['value', 'code'] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                })
+                resolve({
+                    errCode: 0,
+                    data: cv.rows,
+                    count: cv.count
+                })
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+}
 
 module.exports = {
     handleCreateCv: handleCreateCv,
     getAllListCvByPost: getAllListCvByPost,
     getDetailCvById: getDetailCvById,
+    getAllCvByUserId: getAllCvByUserId,
 
 }

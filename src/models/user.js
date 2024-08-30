@@ -23,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
             // //Cv
             User.hasMany(models.Cv, { foreignKey: 'userId', as: 'userCvData' })
 
+            //Post
+            User.hasMany(models.Post,{foreignKey: 'userId', as: 'userPostData' })
+
             //UserSetting
             User.hasOne(models.UserSetting, { foreignKey: 'userId', as: 'userSettingData' })
 

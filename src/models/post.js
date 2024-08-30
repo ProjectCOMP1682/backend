@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             Post.belongsTo(models.User,{foreignKey: 'userId', targetKey: 'id', as: 'userPostData' })
             //DetailPost
             Post.belongsTo(models.DetailPost,{foreignKey: 'detailPostId', targetKey: 'id', as: 'postDetailData' })
+            // //Cv
+            Post.hasMany(models.Cv,{foreignKey:'postId',as:'postCvData'})
 
              }
     };

@@ -21,7 +21,10 @@ module.exports = (sequelize, DataTypes) => {
             
             // Post
             DetailPost.hasMany(models.Post,{foreignKey: 'detailPostId', as: 'postDetailData' })
-   }
+            // //Cv
+            DetailPost.hasMany(models.Cv,{foreignKey:'postId',as:'postCvData'})
+
+        }
     };
     DetailPost.init({
         name: DataTypes.STRING,
