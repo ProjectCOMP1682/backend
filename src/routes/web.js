@@ -31,6 +31,11 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-code', allcodeController.getAllCodeService)
     router.get('/api/get-detail-all-code-by-code', allcodeController.getDetailAllcodeByCode)
     router.get('/api/get-list-allcode', allcodeController.getListAllCodeService)
+    router.post('/api/create-new-skill',middlewareControllers.verifyTokenAdmin ,allcodeController.handleCreateNewSkill)
+    router.delete('/api/delete-skill',middlewareControllers.verifyTokenAdmin ,allcodeController.handleDeleteSkill)
+    router.put('/api/update-skill', middlewareControllers.verifyTokenAdmin,allcodeController.handleUpdateSkill)
+    router.get('/api/get-list-skill', allcodeController.getListSkill)
+    router.get('/api/get-detail-skill-by-id',middlewareControllers.verifyTokenAdmin ,allcodeController.getDetailSkillById)
 
     //==================API COMPANY=========================//
     router.post('/api/create-new-company', middlewareControllers.verifyTokenUser,companyController.handleCreateNewCompany)
