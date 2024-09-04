@@ -65,6 +65,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-list-cv-by-post',cvController.getAllListCvByPost)
     router.get('/api/get-detail-cv-by-id', middlewareControllers.verifyTokenUser,cvController.getDetailCvById)
     router.get('/api/get-all-cv-by-userId', middlewareControllers.verifyTokenUser,cvController.getAllCvByUserId)
+    router.get('/api/fillter-cv-by-selection', cvController.fillterCVBySelection)
 
     return app.use("/", router);
 }
