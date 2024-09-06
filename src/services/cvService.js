@@ -351,11 +351,80 @@ let fillterCVBySelection = (data) => {
         }
     })
 }
+
+let checkSeeCandiate = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.userId && !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let company
+                if (data.userId !== 'null') {
+                    let user = await db.User.findOne({
+                        where: {id: data.userId},
+                        attributes: {
+                            exclude: ['userId']
+                        }
+                    })
+                    company = await db.Company.findOne({
+                        where : {id: user.companyId},
+                        attributes: ['id','allowCV','allowCvFree'],
+                        raw: false
+                    })
+                }
+                else {
+                    company = await db.Company.findOne({
+                        where: { id: data.companyId },
+                        attributes: ['id','allowCV','allowCvFree'],
+                        raw: false
+                    })
+                }
+                if (!company) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: "User owned company not found"
+                    })
+                }
+                else {
+                    if (company.allowCvFree > 0) {
+                        company.allowCvFree -= 1
+                        await company.save()
+                        resolve({
+                            errCode: 0,
+                            errMessage: "Ok"
+                        })
+                    }
+                    else if (company.allowCV > 0) {
+                        company.allowCV -= 1
+                        await company.save()
+                        resolve({
+                            errCode: 0,
+                            errMessage: "Ok"
+                        })
+                    }
+                    else {
+                        resolve({
+                            errCode: 1,
+                            errMessage: "Your company has no views"
+                        })
+                    }
+
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateCv: handleCreateCv,
     getAllListCvByPost: getAllListCvByPost,
     getDetailCvById: getDetailCvById,
     getAllCvByUserId: getAllCvByUserId,
     fillterCVBySelection: fillterCVBySelection,
+    checkSeeCandiate: checkSeeCandiate
 
 }
