@@ -136,6 +136,18 @@ let getDetailSkillById = async (req, res) => {
         })
     }
 }
+let getListJobTypeAndCountPost = async (req, res) => {
+    try {
+        let data = await allcodeService.getListJobTypeAndCountPost(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
@@ -148,4 +160,6 @@ module.exports = {
     handleUpdateSkill:handleUpdateSkill,
     getDetailSkillById:getDetailSkillById,
     getListSkill:getListSkill,
+    getListJobTypeAndCountPost: getListJobTypeAndCountPost,
+
 }

@@ -419,6 +419,40 @@ let getDetailSkillById = (id) => {
         }
     })
 }
+let getListJobTypeAndCountPost = async (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let res = await db.Post.findAll({
+                where: {
+                    statusCode: 'PS1'
+                },
+                include: [
+                    {
+                        model: db.DetailPost, as: 'postDetailData', attributes: [],
+                        include: [
+                            { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code', 'image'] }
+                        ],
+                    }
+                ],
+                attributes: [[db.sequelize.fn('COUNT', db.sequelize.col('postDetailData.categoryJobCode')), 'amount']],
+                group: ['postDetailData.categoryJobCode'],
+                order: [[db.sequelize.literal('amount'), 'DESC']],
+                limit: +data.limit,
+                offset: +data.offset,
+                raw: true,
+                nest: true
+            })
+            resolve({
+                errCode: 0,
+                data: res
+            })
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
@@ -431,4 +465,6 @@ module.exports = {
     handleUpdateSkill:handleUpdateSkill,
     getDetailSkillById:getDetailSkillById,
     getListSkill:getListSkill,
+    getListJobTypeAndCountPost: getListJobTypeAndCountPost,
+
 }

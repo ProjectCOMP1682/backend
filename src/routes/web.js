@@ -36,6 +36,7 @@ let initWebRoutes = (app) => {
     router.put('/api/update-skill', middlewareControllers.verifyTokenAdmin,allcodeController.handleUpdateSkill)
     router.get('/api/get-list-skill', allcodeController.getListSkill)
     router.get('/api/get-detail-skill-by-id',middlewareControllers.verifyTokenAdmin ,allcodeController.getDetailSkillById)
+    router.get('/api/get-list-job-count-post', allcodeController.getListJobTypeAndCountPost)
 
     //==================API COMPANY=========================//
     router.post('/api/create-new-company', middlewareControllers.verifyTokenUser,companyController.handleCreateNewCompany)
