@@ -4,6 +4,7 @@ import allcodeController from '../controllers/allcodeController';
 import companyController from '../controllers/companyController';
 import postController from '../controllers/postController';
 import cvController from '../controllers/cvController'
+import packageController from '../controllers/packagePostController'
 
 
 import middlewareControllers from '../middlewares/jwtVerify'
