@@ -68,6 +68,12 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-cv-by-userId', middlewareControllers.verifyTokenUser,cvController.getAllCvByUserId)
     router.get('/api/fillter-cv-by-selection', cvController.fillterCVBySelection)
     router.get('/api/check-see-candiate', middlewareControllers.verifyTokenUser,cvController.checkSeeCandiate)
+    //==================API PACKAGE==========================//
+    router.post('/api/create-package-post', middlewareControllers.verifyTokenAdmin ,packageController.creatNewPackagePost)
+    router.put('/api/update-package-post',middlewareControllers.verifyTokenAdmin , packageController.updatePackagePost)
+    router.get('/api/get-all-package',middlewareControllers.verifyTokenUser,packageController.getAllPackage)
+    router.put('/api/set-active-package-post', middlewareControllers.verifyTokenAdmin ,packageController.setActiveTypePackage)
+
 
     return app.use("/", router);
 }
