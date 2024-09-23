@@ -156,8 +156,64 @@ let setActiveTypePackage = (data) => {
     })
 }
 
+let getPackageByType = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (data.isHot === '') {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let packagePost = await db.PackagePost.findAll({
+                    where: { isHot: data.isHot }
+                })
+                resolve({
+                    errCode: 0,
+                    data: packagePost
+                })
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+let getPackageById = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let packagePost = await db.PackagePost.findOne({
+                    where: { id: data.id }
+                })
+                if (packagePost) {
+                    resolve({
+                        errCode: 0,
+                        data: packagePost
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'The data package product was not found'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 module.exports = {
    getAllPackage, setActiveTypePackage,
-     creatNewPackagePost, updatePackagePost,
+     creatNewPackagePost, updatePackagePost, getPackageByType,  getPackageById
 }
