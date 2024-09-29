@@ -1,31 +1,5 @@
-import packageService from '../services/packagePostService';
+import packageService from '../services/packageCvService';
 
-
-let creatNewPackagePost = async (req, res) => {
-    try {
-        let data = await packageService.creatNewPackagePost(req.body);
-        return res.status(200).json(data);
-    } catch (error) {
-        console.log(error)
-        return res.status(200).json({
-            errCode: -1,
-            errMessage: 'Error from server'
-        })
-    }
-}
-
-let updatePackagePost = async (req, res) => {
-    try {
-        let data = await packageService.updatePackagePost(req.body);
-        return res.status(200).json(data);
-    } catch (error) {
-        console.log(error)
-        return res.status(200).json({
-            errCode: -1,
-            errMessage: 'Error from server'
-        })
-    }
-}
 let getAllPackage = async (req, res) => {
     try {
         let data = await packageService.getAllPackage(req.query);
@@ -38,8 +12,6 @@ let getAllPackage = async (req, res) => {
         })
     }
 }
-
-
 
 let setActiveTypePackage = async (req, res) => {
     try {
@@ -54,10 +26,9 @@ let setActiveTypePackage = async (req, res) => {
     }
 }
 
-
-let getPackageById = async (req, res) => {
+let creatNewPackageCv = async (req, res) => {
     try {
-        let data = await packageService.getPackageById(req.query);
+        let data = await packageService.creatNewPackageCv(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -68,9 +39,9 @@ let getPackageById = async (req, res) => {
     }
 }
 
-let getPackageByType = async (req, res) => {
+let updatePackageCv = async (req, res) => {
     try {
-        let data = await packageService.getPackageByType(req.query);
+        let data = await packageService.updatePackageCv(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -82,11 +53,8 @@ let getPackageByType = async (req, res) => {
 }
 
 module.exports = {
-    creatNewPackagePost: creatNewPackagePost,
-    updatePackagePost: updatePackagePost,
+    creatNewPackageCv: creatNewPackageCv,
+    updatePackageCv: updatePackageCv,
     getAllPackage: getAllPackage,
-    setActiveTypePackage: setActiveTypePackage,
-    getPackageByType : getPackageByType,
-    getPackageById: getPackageById
-
+    setActiveTypePackage: setActiveTypePackage
 }

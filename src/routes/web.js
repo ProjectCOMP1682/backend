@@ -5,7 +5,7 @@ import companyController from '../controllers/companyController';
 import postController from '../controllers/postController';
 import cvController from '../controllers/cvController'
 import packageController from '../controllers/packagePostController'
-
+import packageCvController from '../controllers/packageCvController'
 
 import middlewareControllers from '../middlewares/jwtVerify'
 let router = express.Router();
@@ -77,6 +77,11 @@ let initWebRoutes = (app) => {
     router.get('/api/get-package-by-type', middlewareControllers.verifyTokenUser,packageController.getPackageByType)
     router.get('/api/get-package-by-id', middlewareControllers.verifyTokenUser,packageController.getPackageById)
 
+    //==================API PACKAGE CV==========================//
+    router.post('/api/create-package-cv', middlewareControllers.verifyTokenAdmin ,packageCvController.creatNewPackageCv)
+    router.put('/api/update-package-cv',middlewareControllers.verifyTokenAdmin , packageCvController.updatePackageCv)
+    router.put('/api/set-active-package-cv', middlewareControllers.verifyTokenAdmin ,packageCvController.setActiveTypePackage)
+    router.get('/api/get-all-package-cv',middlewareControllers.verifyTokenUser,packageCvController.getAllPackage)
     return app.use("/", router);
 }
 

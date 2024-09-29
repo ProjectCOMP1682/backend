@@ -130,7 +130,7 @@ let handleCreateNewUser = (data) => {
                                     <p>Tài khoản: ${data.phonenumber}</p>
                                     <p>Mật khẩu: ${data.password}</p>
                         `
-                        sendmail(note,data.email)                        
+                        sendmail(note,data.email)
                     }
                     resolve({
                         errCode: 0,
@@ -183,7 +183,7 @@ let updateUserData = (data) => {
                     }
                     await user.save();
                     if (data.roleCode)
-                    account.roleCode = data.roleCode
+                        account.roleCode = data.roleCode
                     await account.save();
                     let temp = {
                         address: user.address,

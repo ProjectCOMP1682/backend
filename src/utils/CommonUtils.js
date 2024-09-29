@@ -1,6 +1,5 @@
 import JWT from 'jsonwebtoken'
 require('dotenv').config();
-
 let encodeToken = (userId) =>{
     return JWT.sign({
         iss: 'Tai Nguyen',

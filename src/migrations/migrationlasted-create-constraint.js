@@ -1,6 +1,16 @@
 module.exports = {
   up: (queryInterface, Sequelize) => new Promise((resolve, reject) => {
     {
+      queryInterface.addConstraint('Companies', {
+        type: 'foreign key',
+        fields: ['userId'],
+        name: 'FK_Companies_Users',
+        references: {
+          table: 'Users',
+          field: 'id',
+        },
+        onUpdate: "CASCADE",
+      })
       queryInterface.addConstraint('Cvs', {
         type: 'foreign key',
         fields: ['postId'],
@@ -31,6 +41,16 @@ module.exports = {
         },
         onUpdate: "CASCADE",
       })
+      // queryInterface.addConstraint('Notifications', {
+      //   type: 'foreign key',
+      //   fields: ['userId'],
+      //   name: 'FK_Notifications_Users',
+      //   references: {
+      //     table: 'Users',
+      //     field: 'id',
+      //   },
+      //   onUpdate: "CASCADE",
+      // })
       queryInterface.addConstraint('Posts', {
         type: 'foreign key',
         fields: ['detailPostId'],
@@ -41,16 +61,7 @@ module.exports = {
         },
         onUpdate: "CASCADE",
       })
-      queryInterface.addConstraint('Companies', {
-        type: 'foreign key',
-        fields: ['userId'],
-        name: 'FK_Companies_Users',
-        references: {
-          table: 'Users',
-          field: 'id',
-        },
-        onUpdate: "CASCADE",
-      })
+
 
       queryInterface.addConstraint('Accounts', {
         type: 'foreign key',
@@ -78,12 +89,13 @@ module.exports = {
   down: (queryInterface, Sequelize) => new Promise((resolve, reject) => {
     {
       queryInterface.removeConstraint('Companies', 'FK_Companies_Users')
-      queryInterface.removeConstraint('Accounts', 'FK_Accounts_Users')
-      queryInterface.removeConstraint('Users', 'FK_Users_Companies')
-      queryInterface.removeConstraint('Posts', 'FK_Posts_Users')
-      queryInterface.removeConstraint('Posts','FK_Posts_DetailPosts')
       queryInterface.removeConstraint('Cvs', 'FK_Cvs_Posts')
       queryInterface.removeConstraint('Cvs', 'FK_Cvs_Users')
+      queryInterface.removeConstraint('Posts', 'FK_Posts_Users')
+      queryInterface.removeConstraint('Posts','FK_Posts_DetailPosts')
+      // queryInterface.removeConstraint('Notifications', 'FK_Notifications_Users')
+      queryInterface.removeConstraint('Accounts', 'FK_Accounts_Users')
+      queryInterface.removeConstraint('Users', 'FK_Users_Companies')
 
     }
   })
