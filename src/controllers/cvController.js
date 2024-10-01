@@ -72,6 +72,8 @@ let checkSeeCandiate= async (req, res) => {
         })
     }
 }
+
+
 module.exports = {
     handleCreateNewCV: handleCreateNewCV,
     getAllListCvByPost: getAllListCvByPost,

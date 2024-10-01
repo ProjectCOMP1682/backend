@@ -155,6 +155,52 @@ let setActiveTypePackage = (data) => {
     })
 }
 
+let getPackageById = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+                })
+            } else {
+                let packageCvs = await db.PackageCv.findOne({
+                    where: { id: data.id }
+                })
+                if (packageCvs) {
+                    resolve({
+                        errCode: 0,
+                        data: packageCvs
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Product package data not found'
+                    })
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+let getAllToSelect = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let packageCvs = await db.PackageCv.findAll()
+            resolve({
+                errCode: 0,
+                data: packageCvs
+            })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
-getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv,
+getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,
 }
