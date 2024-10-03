@@ -28,7 +28,7 @@ let handleUpdateUser = async (req, res) => {
 
 let handleBanUser = async (req, res) => {
     try {
-        let data = await userService.banUser(req.body);
+        let data = await userService.banUser(req.body.data.id);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -40,7 +40,7 @@ let handleBanUser = async (req, res) => {
 }
 let handleUnbanUser = async (req, res) => {
     try {
-        let data = await userService.unbanUser(req.body);
+        let data = await userService.unbanUser(req.body.data.id);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)

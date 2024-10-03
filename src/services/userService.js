@@ -216,19 +216,19 @@ let updateUserData = (data) => {
         }
     })
 }
-let banUser = (data) => {
+
+let banUser = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!data.id) {
+            if (!userId) {
                 resolve({
                     errCode: 1,
                     errMessage: `Missing required parameters !`
                 })
             } else {
-
                 let foundUser = await db.User.findOne({
-                    where: { id: data.id },
+                    where: { id: userId },
                     attributes: {
                         exclude: ['userId']
                     }
@@ -241,7 +241,7 @@ let banUser = (data) => {
                 }
                 else{
                     let account = await db.Account.findOne({
-                        where: {userId: data.id},
+                        where: {userId: userId},
                         raw: false
                     })
                     if (account)
@@ -262,18 +262,18 @@ let banUser = (data) => {
     })
 }
 
-let unbanUser = (data) => {
+let unbanUser = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!data.id) {
+            if (!userId) {
                 resolve({
                     errCode: 1,
                     errMessage: `Missing required parameters !`
                 })
             } else {
                 let foundUser = await db.User.findOne({
-                    where: { id: data.id },
+                    where: { id: userId },
                     attributes: {
                         exclude: ['userId']
                     }
@@ -281,12 +281,12 @@ let unbanUser = (data) => {
                 if (!foundUser) {
                     resolve({
                         errCode: 2,
-                        errMessage: `User has been deactivated`
+                        errMessage: `User does not exist`
                     })
                 }
                 else{
                     let account = await db.Account.findOne({
-                        where: {userId: data.id},
+                        where: {userId: userId},
                         raw: false
                     })
                     if (account)
