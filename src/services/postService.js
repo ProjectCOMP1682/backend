@@ -462,7 +462,29 @@ let getAllPostByAdmin = (data) => {
                     ],
                     order: [['updatedAt', 'DESC']],
                 }
-
+// if (data.search) {
+                //     objectFilter.include[0].where = {name: {[Op.like]: `%${data.search}%`}}
+                // }
+                if (data.censorCode) {
+                    objectFilter.where = {statusCode : data.censorCode}
+                }
+                if (data.search) {
+                    objectFilter.where = { ...objectFilter.where,
+                        [Op.or]: [
+                            db.Sequelize.where(db.sequelize.col('postDetailData.name'),{
+                                [Op.like]: `%${data.search}%`
+                            }),
+                            {
+                                id : {
+                                    [Op.like]: `%${data.search}%`
+                                }
+                            },
+                            db.Sequelize.where(db.sequelize.col('userPostData.userCompanyData.name'),{
+                                [Op.like]: `%${data.search}%`
+                            }),
+                        ]
+                    }
+                }
 
                 let post = await db.Post.findAndCountAll(objectFilter)
                 resolve({
@@ -654,6 +676,43 @@ let getFilterPost = (data) => {
         }
     })
 }
+let getListNoteByPost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let res = await db.Note.findAndCountAll({
+                    where: {postId: data.id},
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    include: [
+                        {model: db.User , as: 'userNoteData' ,
+                            attributes: {
+                                exclude: ['userId']
+                            }
+                        }
+                    ],
+                    order: [['createdAt', 'DESC']],
+                    raw: true,
+                    nest: true
+                })
+                resolve({
+                    errCode: 0,
+                    data: res.rows,
+                    count: res.count
+                })
+
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+}
+
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -664,5 +723,6 @@ module.exports = {
     getAllPostByAdmin: getAllPostByAdmin,
     getDetailPostById: getDetailPostById,
     getFilterPost: getFilterPost,
+    getListNoteByPost: getListNoteByPost,
 
 }

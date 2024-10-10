@@ -83,7 +83,16 @@ module.exports = {
         },
         onUpdate: 'CASCADE'
       })
-
+      queryInterface.addConstraint('Notes', {
+        type: 'foreign key',
+        fields: ['postId'],
+        name: 'FK_Notes_Posts',
+        references: {
+          table: 'Posts',
+          field: 'id',
+        },
+        onUpdate: 'CASCADE'
+      })
     }
   }),
   down: (queryInterface, Sequelize) => new Promise((resolve, reject) => {
@@ -96,6 +105,7 @@ module.exports = {
       // queryInterface.removeConstraint('Notifications', 'FK_Notifications_Users')
       queryInterface.removeConstraint('Accounts', 'FK_Accounts_Users')
       queryInterface.removeConstraint('Users', 'FK_Users_Companies')
+      queryInterface.removeConstraint('Notes', 'FK_Notes_Posts')
 
     }
   })

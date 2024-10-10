@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
             // //Cv
             Post.hasMany(models.Cv,{foreignKey:'postId',as:'postCvData'})
 
+            //Note
+            Post.hasMany(models.Note,{foreignKey:'postId',as:'postNoteData'})
              }
     };
     Post.init({
