@@ -25,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
 
             //Post
             User.hasMany(models.Post,{foreignKey: 'userId', as: 'userPostData' })
-
+            //Note
+            User.hasMany(models.Note,{foreignKey:'userId',as:'userNoteData'})
             //UserSetting
             User.hasOne(models.UserSetting, { foreignKey: 'userId', as: 'userSettingData' })
 

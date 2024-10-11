@@ -222,7 +222,11 @@ let handleAcceptPost = (data) => {
                     }
                     await foundPost.save()
                     let note = data.statusCode == "PS1" ? "Post approved successfully" : data.note
-
+                    await db.Note.create({
+                        postId: foundPost.id,
+                        note: note,
+                        userId: data.userId
+                    })
                     let user = await db.User.findOne({
                         where: { id: foundPost.userId },
                         attributes: {
@@ -267,6 +271,11 @@ let handleBanPost = (data) => {
                 let foundPost = await db.Post.findOne({
                     where: { id: data.postId },
                     raw: false
+                })
+                await db.Note.create({
+                    postId: foundPost.id,
+                    note: data.note,
+                    userId: data.userId
                 })
                 if (foundPost) {
                     foundPost.statusCode = 'PS4'
@@ -315,7 +324,11 @@ let handleActivePost = (data) => {
                 if (foundPost) {
                     foundPost.statusCode = 'PS3'
                     await foundPost.save()
-
+                    await db.Note.create({
+                        postId: foundPost.id,
+                        note: data.note,
+                        userId: data.userId
+                    })
                     let user = await db.User.findOne({
                         where: { id: foundPost.userId },
                         attributes: {
