@@ -327,7 +327,24 @@ let getListSkill = (data) => {
                     raw: true,
                     nest: true
                 }
-
+                if (data.search) {
+                    objectFilter.where = {
+                        ...objectFilter.where,
+                        name: {
+                            [Op.like]: `%${data.search}%`
+                        }
+                    }
+                }
+                if (data.categoryJobCode) {
+                    objectFilter.where = {
+                        ...objectFilter.where,
+                        [Op.and]: [
+                            db.Sequelize.where(db.sequelize.col('jobTypeSkillData.code'),{
+                                [Op.eq]: data.categoryJobCode
+                            }),
+                        ]
+                    }
+                }
                 let skills = await db.Skill.findAndCountAll(objectFilter)
                 resolve({
                     errCode: 0,
