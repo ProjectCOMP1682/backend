@@ -65,93 +65,96 @@ let checkCompany = (name, id = null) => {
     })
 }
 
-
 let handleCreateNewCompany = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            resolve({
-                errCode: 2,
-                errMessage: 'Company name already exists'
-            })
+            // Check if required parameters are missing
             if (!data.name || !data.phonenumber || !data.address
                 || !data.descriptionHTML || !data.descriptionMarkdown
                 || !data.amountEmployer || !data.userId) {
-                resolve({
+                return resolve({
                     errCode: 1,
-                    errMessage: 'Missing required parameters !'
-                })
-            } else {
-                if (await checkCompany(data.name)) {
-                }
-                else {
-                    let thumbnailUrl = ""
-                    let coverimageUrl = ""
-                    if (data.thumbnail && data.coverimage) {
-
-                        const uploadedThumbnailResponse = await cloudinary.uploader.upload(data.thumbnail, {
-                            upload_preset: 'dev_setups'
-                        })
-                        const uploadedCoverImageResponse = await cloudinary.uploader.upload(data.coverimage, {
-                            upload_preset: 'dev_setups'
-                        })
-                        thumbnailUrl = uploadedThumbnailResponse.url
-                        coverimageUrl = uploadedCoverImageResponse.url
-                    }
-
-
-                    let company = await db.Company.create({
-                        name: data.name,
-                        thumbnail: thumbnailUrl,
-                        coverimage: coverimageUrl,
-                        descriptionHTML: data.descriptionHTML,
-                        descriptionMarkdown: data.descriptionMarkdown,
-                        website: data.website,
-                        address: data.address,
-                        phonenumber: data.phonenumber,
-                        amountEmployer: data.amountEmployer,
-                        taxnumber: data.taxnumber,
-                        statusCode: 'S1',
-                        userId: data.userId,
-                        censorCode: data.file ? 'CS3' : 'CS2',
-                        file: data.file ? data.file : null
-                    })
-                    let user = await db.User.findOne({
-                        where: { id: data.userId },
-                        raw: false,
-                        attributes: {
-                            exclude: ['userId']
-                        }
-                    })
-
-                    let account = await db.Account.findOne({
-                        where: { userId: data.userId },
-                        raw: false
-                    })
-
-                    if (user && account) {
-                        user.companyId = company.id
-                        await user.save()
-                        account.roleCode = 'COMPANY'
-                        await account.save()
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Successfully created company',
-                            companyId : company.id
-                        })
-                    }
-                    else {
-                        resolve({
-                            errCode: 2,
-                            errMessage: 'User not found'
-                        })
-                    }
-                }
+                    errMessage: 'Missing required parameters!'
+                });
             }
+
+            // Check if the company name already exists
+            const isCompanyExists = await checkCompany(data.name);
+            if (isCompanyExists) {
+                return resolve({
+                    errCode: 2,
+                    errMessage: 'Company name already exists'
+                });
+            }
+
+            // Initialize URLs for images
+            let thumbnailUrl = "";
+            let coverimageUrl = "";
+
+            // If images are provided, upload them
+            if (data.thumbnail && data.coverimage) {
+                const uploadedThumbnailResponse = await cloudinary.uploader.upload(data.thumbnail, {
+                    upload_preset: 'dev_setups'
+                });
+                const uploadedCoverImageResponse = await cloudinary.uploader.upload(data.coverimage, {
+                    upload_preset: 'dev_setups'
+                });
+                thumbnailUrl = uploadedThumbnailResponse.url;
+                coverimageUrl = uploadedCoverImageResponse.url;
+            }
+
+            // Create the company record in the database
+            let company = await db.Company.create({
+                name: data.name,
+                thumbnail: thumbnailUrl,
+                coverimage: coverimageUrl,
+                descriptionHTML: data.descriptionHTML,
+                descriptionMarkdown: data.descriptionMarkdown,
+                website: data.website,
+                address: data.address,
+                phonenumber: data.phonenumber,
+                amountEmployer: data.amountEmployer,
+                taxnumber: data.taxnumber,
+                statusCode: 'S1',
+                userId: data.userId,
+                censorCode: data.file ? 'CS3' : 'CS2',
+                file: data.file ? data.file : null
+            });
+
+            // Update the user and account details with the new company ID
+            let user = await db.User.findOne({
+                where: { id: data.userId },
+                raw: false
+            });
+
+            let account = await db.Account.findOne({
+                where: { userId: data.userId },
+                raw: false
+            });
+
+            if (user && account) {
+                user.companyId = company.id;
+                await user.save();
+                account.roleCode = 'COMPANY';
+                await account.save();
+                return resolve({
+                    errCode: 0,
+                    errMessage: 'Successfully created company',
+                    companyId: company.id
+                });
+            } else {
+                return resolve({
+                    errCode: 3,
+                    errMessage: 'User not found'
+                });
+            }
+
         } catch (error) {
-            reject(error)
+            reject(error);
         }
-    })
+    });
 }
+
 let handleUpdateCompany = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
