@@ -725,7 +725,91 @@ let getListNoteByPost = (data) => {
         }
     })
 }
+let handleReupPost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.userId || !data.postId || !data.timeEnd) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let user = await db.User.findOne({
+                    where: { id: data.userId },
+                    attributes: {
+                        exclude: ['userId']
+                    }
+                })
+                let company = await db.Company.findOne({
+                    where: { id: user.companyId },
+                    raw: false
+                })
+                if (!company) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Người dùng không thuộc công ty'
+                    })
+                    return
+                }
+                else {
+                    let post = await db.Post.findOne({
+                        where: {id: data.postId}
+                    })
+                    if (!post)
+                    {
+                        resolve({
+                            errCode: 2,
+                            errMessage: 'Bài viết không tồn tại'
+                        })
+                        return
+                    }
+                    else {
+                        if (post.isHot == '1') {
+                            if (company.allowHotPost > 0) {
+                                company.allowHotPost -= 1
+                                await company.save()
+                            }
+                            else {
+                                resolve({
+                                    errCode: 2,
+                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết nổi bật'
+                                })
+                                return
+                            }
+                        }
+                        else {
+                            if (company.allowPost > 0) {
+                                company.allowPost -= 1
+                                await company.save()
+                            }
+                            else {
+                                resolve({
+                                    errCode: 2,
+                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết bình thường'
+                                })
+                                return
+                            }
+                        }
+                        await db.Post.create({
+                            statusCode: 'PS3',
+                            timeEnd: data.timeEnd,
+                            userId: data.userId,
+                            isHot: post.isHot,
+                            detailPostId: post.detailPostId
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Tạo bài tuyển dụng thành công hãy chờ quản trị viên duyệt'
+                        })
 
+                    }
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -737,5 +821,5 @@ module.exports = {
     getDetailPostById: getDetailPostById,
     getFilterPost: getFilterPost,
     getListNoteByPost: getListNoteByPost,
-
+    handleReupPost: handleReupPost
 }
