@@ -369,7 +369,7 @@ let getListPostByAdmin = (data) => {
                 if (!company) {
                     resolve({
                         errCode: 2,
-                        errorMessage: 'The company does not exist',
+                        errorMessage: 'Company does not exist',
                     })
                 }
                 else {
@@ -418,7 +418,24 @@ let getListPostByAdmin = (data) => {
                             }
                         ]
                     }
-
+                    if (data.censorCode) {
+                        objectFilter.where = {...objectFilter.where,statusCode: data.censorCode}
+                    }
+                    if (data.search) {
+                        objectFilter.where = {
+                            ...objectFilter.where,
+                            [Op.or]: [
+                                db.Sequelize.where(db.sequelize.col('postDetailData.name'),{
+                                    [Op.like]: `%${data.search}%`
+                                }),
+                                {
+                                    id : {
+                                        [Op.like]: `%${data.search}%`
+                                    }
+                                }
+                            ]
+                        }
+                    }
                     let post = await db.Post.findAndCountAll(objectFilter)
                     resolve({
                         errCode: 0,
@@ -434,6 +451,7 @@ let getListPostByAdmin = (data) => {
 
 
 }
+
 let getAllPostByAdmin = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -747,7 +765,7 @@ let handleReupPost = (data) => {
                 if (!company) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Người dùng không thuộc công ty'
+                        errMessage: 'User is not affiliated with the company'
                     })
                     return
                 }
@@ -759,7 +777,7 @@ let handleReupPost = (data) => {
                     {
                         resolve({
                             errCode: 2,
-                            errMessage: 'Bài viết không tồn tại'
+                            errMessage: 'The post does not exist'
                         })
                         return
                     }
@@ -772,7 +790,7 @@ let handleReupPost = (data) => {
                             else {
                                 resolve({
                                     errCode: 2,
-                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết nổi bật'
+                                    errMessage: 'Your company has run out of featured posts.'
                                 })
                                 return
                             }
@@ -785,7 +803,7 @@ let handleReupPost = (data) => {
                             else {
                                 resolve({
                                     errCode: 2,
-                                    errMessage: 'Công ty bạn đã hết số lần đăng bài viết bình thường'
+                                    errMessage: 'Your company has run out of normal posting times.'
                                 })
                                 return
                             }
@@ -799,7 +817,7 @@ let handleReupPost = (data) => {
                         })
                         resolve({
                             errCode: 0,
-                            errMessage: 'Tạo bài tuyển dụng thành công hãy chờ quản trị viên duyệt'
+                            errMessage: 'Successfully created job posting, please wait for admin approval'
                         })
 
                     }
