@@ -79,7 +79,8 @@ let initWebRoutes = (app) => {
     router.put('/api/set-active-package-post', middlewareControllers.verifyTokenAdmin ,packageController.setActiveTypePackage)
     router.get('/api/get-package-by-type', middlewareControllers.verifyTokenUser,packageController.getPackageByType)
     router.get('/api/get-package-by-id', middlewareControllers.verifyTokenUser,packageController.getPackageById)
-
+    router.get('/api/get-payment-link', middlewareControllers.verifyTokenUser,packageController.getPaymentLink)
+    router.post('/api/payment-success',middlewareControllers.verifyTokenUser  ,packageController.paymentOrderSuccess)
     //==================API PACKAGE CV==========================//
     router.post('/api/create-package-cv', middlewareControllers.verifyTokenAdmin ,packageCvController.creatNewPackageCv)
     router.put('/api/update-package-cv',middlewareControllers.verifyTokenAdmin , packageCvController.updatePackageCv)

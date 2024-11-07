@@ -33,6 +33,8 @@ module.exports = (sequelize, DataTypes) => {
             //UserSkill - Skill
             User.belongsToMany(models.Skill, { through: models.UserSkill});
 
+            //OrderPackage
+            User.hasMany(models.User,{foreignKey:'userId',as: 'userOrderData'})
         }
     };
     User.init({
