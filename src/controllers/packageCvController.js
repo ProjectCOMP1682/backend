@@ -76,6 +76,32 @@ let getPackageById = async (req, res) => {
         })
     }
 }
+let getPaymentLink = async (req, res) => {
+    try {
+        let data = await packageService.getPaymentLink(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
+let paymentOrderSuccess = async (req, res) => {
+    try {
+        let data = await packageService.paymentOrderSuccess(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
 module.exports = {
     creatNewPackageCv: creatNewPackageCv,
     updatePackageCv: updatePackageCv,
@@ -83,4 +109,6 @@ module.exports = {
     setActiveTypePackage: setActiveTypePackage,
     getPackageById: getPackageById,
     getAllToSelect: getAllToSelect,
+    getPaymentLink:getPaymentLink,
+    paymentOrderSuccess:paymentOrderSuccess,
 }

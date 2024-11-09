@@ -470,6 +470,45 @@ let getListJobTypeAndCountPost = async (data) => {
         }
     })
 }
+
+let getAllSkillByJobCode = (categoryJobCode) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!categoryJobCode) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            }
+            else {
+                let objectFilter = {
+                    include: [
+                        { model: db.Allcode, as: 'jobTypeSkillData', attributes: ['value', 'code'] }
+                    ],
+                    raw: true,
+                    nest: true
+                }
+                if (categoryJobCode !== 'getAll') {
+                    objectFilter.where = {
+                        [Op.and]: [
+                            db.Sequelize.where(db.sequelize.col('jobTypeSkillData.code'),{
+                                [Op.eq]: categoryJobCode
+                            }),
+                        ]
+                    }
+                }
+                let skills = await db.Skill.findAll(objectFilter)
+                resolve({
+                    errCode: 0,
+                    data: skills
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     handleCreateNewAllCode: handleCreateNewAllCode,
     handleUpdateAllCode: handleUpdateAllCode,
@@ -483,5 +522,5 @@ module.exports = {
     getDetailSkillById:getDetailSkillById,
     getListSkill:getListSkill,
     getListJobTypeAndCountPost: getListJobTypeAndCountPost,
-
+    getAllSkillByJobCode:  getAllSkillByJobCode,
 }

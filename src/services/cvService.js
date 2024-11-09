@@ -67,13 +67,13 @@ let handleCreateCv = (data) => {
                 if (cv) {
                     resolve({
                         errCode: 0,
-                        errMessage: 'CV sent successfully'
+                        errMessage: 'Cv sent successfully'
                     })
                 }
                 else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'CV sent failed'
+                        errMessage: 'Cv sent failed'
                     })
                 }
             }
@@ -89,7 +89,7 @@ let getAllListCvByPost = (data) => {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters !'
-                })
+                });
             } else {
                 let cv = await db.Cv.findAndCountAll({
                     where: { postId: data.postId },
@@ -111,7 +111,8 @@ let getAllListCvByPost = (data) => {
                             ]
                         }
                     ]
-                })
+                });
+
                 let postInfo = await db.Post.findOne({
                     where: {id:data.postId},
                     include: [
@@ -130,31 +131,39 @@ let getAllListCvByPost = (data) => {
                     ],
                     raw: true,
                     nest: true
-                })
+                });
+
                 let listSkills = await db.Skill.findAll({
                     where: {categoryJobCode: postInfo.postDetailData.jobTypePostData.code}
-                })
-                let mapRequired = new Map()
-                listSkills = listSkills.map(item => {
-                    mapRequired.set(item.id,item.name)
-                })
-                console.log(mapRequired)
-                getMapRequiredSkill(mapRequired,postInfo)
-                for (let i= 0; i< cv.rows.length; i++) {
-                    let match = await caculateMatchCv(cv.rows[i].file,mapRequired)
-                    cv.rows[i].file = Math.round((match/mapRequired.size + Number.EPSILON) * 100) + '%'
+                });
+
+                let mapRequired = new Map();
+                listSkills.forEach(item => mapRequired.set(item.id, item.name));
+
+                console.log(mapRequired);
+                getMapRequiredSkill(mapRequired, postInfo);
+
+                for (let i = 0; i < cv.rows.length; i++) {
+                    if (mapRequired.size === 0) {
+                        cv.rows[i].file = '0%';
+                    } else {
+                        let match = await caculateMatchCv(cv.rows[i].file, mapRequired);
+                        cv.rows[i].file = Math.round((match / mapRequired.size + Number.EPSILON) * 100) + '%';
+                    }
                 }
+
                 resolve({
                     errCode: 0,
                     data: cv.rows,
                     count: cv.count,
-                })
+                });
             }
         } catch (error) {
-            reject(error)
+            reject(error);
         }
-    })
+    });
 }
+
 let getDetailCvById = (data) => {
     return new Promise(async (resolve, reject) => {
         try {

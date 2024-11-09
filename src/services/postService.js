@@ -14,7 +14,7 @@ let sendmail = (note, userMail, link = null) => {
     var mailOptions = {
         from: process.env.EMAIL_APP,
         to: userMail,
-        subject: 'Notice from TOP CV page',
+        subject: 'Notice from TOP Cv page',
         html: note
     };
     if (link)

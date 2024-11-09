@@ -114,6 +114,16 @@ module.exports = {
       },
       onUpdate: "CASCADE",
     })
+    queryInterface.addConstraint('OrderPackages', {
+      type: 'foreign key',
+      fields: ['userId'],
+      name: 'FK_OrderPackages_Users',
+      references: {
+        table: 'Users',
+        field: 'id',
+      },
+      onUpdate: "CASCADE",
+    })
   }),
   down: (queryInterface, Sequelize) => new Promise((resolve, reject) => {
     {
@@ -128,6 +138,8 @@ module.exports = {
       queryInterface.removeConstraint('Notes', 'FK_Notes_Posts')
       queryInterface.removeConstraint('Notes', 'FK_Notes_Users')
       queryInterface.removeConstraint('OrderPackages', 'FK_OrderPackages_PackagePosts')
+      queryInterface.removeConstraint('OrderPackages', 'FK_OrderPackages_Users')
+
 
 
     }

@@ -1,8 +1,12 @@
 import db from "../models/index";
 const { Op, and } = require("sequelize");
+import paypal, { order } from 'paypal-rest-sdk'
 require('dotenv').config();
-
-
+paypal.configure({
+    'mode': 'sandbox',
+    'client_id': process.env.CLIENT_ID,
+    'client_secret': process.env.CLIENT_SECRET
+});
 let creatNewPackageCv = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -200,7 +204,137 @@ let getAllToSelect = (data) => {
         }
     })
 }
+let getPaymentLink = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id || !data.amount) {
+                resolve({
+                    errCode: 1,
+                    errMessage: `Missing required parameters !`
+
+                })
+            }
+            else {
+                let infoItem = await db.PackageCv.findOne({
+                    where: { id: data.id }
+                })
+                let item = [{
+                    "name": `${infoItem.name}`,
+                    "sku": infoItem.id,
+                    "price": infoItem.price,
+                    "currency": "USD",
+                    "quantity": data.amount
+                }]
+
+                let create_payment_json = {
+                    "intent": "sale",
+                    "payer": {
+                        "payment_method": "paypal"
+                    },
+                    "redirect_urls": {
+                        "return_url": `${process.env.URL_REACT}/admin/paymentCv/success`,
+                        "cancel_url": `${process.env.URL_REACT}/admin/paymentCv/cancel`
+                    },
+                    "transactions": [{
+                        "item_list": {
+                            "items": item
+                        },
+                        "amount": {
+                            "currency": "USD",
+                            "total": +data.amount * infoItem.price
+                        },
+                        "description": "This is the payment description."
+                    }]
+                };
+
+                paypal.payment.create(create_payment_json, function (error, payment) {
+                    if (error) {
+                        resolve({
+                            errCode: -1,
+                            errMessage: error,
+                        })
+
+                    } else {
+                        resolve({
+                            errCode: 0,
+                            link: payment.links[1].href
+                        })
+
+                    }
+                });
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+let paymentOrderSuccess = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.PayerID || !data.paymentId || !data.token || !data.packageCvId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter !'
+                })
+            } else {
+                let infoItem = await db.PackageCv.findOne({
+                    where: { id: data.packageCvId }
+                })
+                let execute_payment_json = {
+                    "payer_id": data.PayerID,
+                    "transactions": [{
+                        "amount": {
+                            "currency": "USD",
+                            "total": +data.amount * infoItem.price
+                        }
+                    }]
+                };
+
+                let paymentId = data.paymentId;
+
+                paypal.payment.execute(paymentId, execute_payment_json, async function (error, payment) {
+                    if (error) {
+                        resolve({
+                            errCode: 0,
+                            errMessage: error
+                        })
+                    } else {
+                        let OrderPackageCV = await db.OrderPackageCV.create({
+                            packageCvId: data.packageCvId,
+                            userId: data.userId,
+                            currentPrice: infoItem.price,
+                            amount: +data.amount
+                        })
+                        if (OrderPackageCV) {
+                            let user = await db.User.findOne({
+                                where: { id: data.userId },
+                                attributes: {
+                                    exclude: ['userId']
+                                }
+                            })
+                            let company = await db.Company.findOne({
+                                where: { id: user.companyId },
+                                raw: false
+                            })
+                            if (company) {
+                                company.allowCv += +infoItem.value * +data.amount
+                                company.save({silent: true})
+                            }
+                        }
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'The system has recorded your purchase history.'
+                        })
+                    }
+                });
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 module.exports = {
-getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,
+getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,
 }

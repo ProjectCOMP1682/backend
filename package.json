@@ -18,7 +18,11 @@
     "jsonwebtoken": "^8.5.1",
     "keyword-extractor": "^0.0.23",
     "nodemailer": "^6.7.7",
-    "paypal-rest-sdk": "^1.8.1"
+    "paypal-rest-sdk": "^1.8.1",
+    "pdf-extract": "^1.0.11",
+    "pdf-parse": "^1.1.1",
+    "pdf.js-extract": "^0.2.0",
+    "pdfjs-dist": "^2.16.105"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
