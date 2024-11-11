@@ -106,6 +106,18 @@ let paymentOrderSuccess = async (req, res) => {
         })
     }
 }
+let getHistoryTrade = async (req, res) => {
+    try {
+        let data = await packageService.getHistoryTrade(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 
 module.exports = {
     creatNewPackagePost: creatNewPackagePost,
@@ -116,4 +128,5 @@ module.exports = {
     getPackageById: getPackageById,
     getPaymentLink: getPaymentLink,
     paymentOrderSuccess: paymentOrderSuccess,
+    getHistoryTrade:getHistoryTrade,
 }

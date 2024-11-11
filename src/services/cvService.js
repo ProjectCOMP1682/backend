@@ -380,14 +380,14 @@ let checkSeeCandiate = (data) => {
                     })
                     company = await db.Company.findOne({
                         where : {id: user.companyId},
-                        attributes: ['id','allowCV','allowCvFree'],
+                        attributes: ['id','allowCv','allowCvFree'],
                         raw: false
                     })
                 }
                 else {
                     company = await db.Company.findOne({
                         where: { id: data.companyId },
-                        attributes: ['id','allowCV','allowCvFree'],
+                        attributes: ['id','allowCv','allowCvFree'],
                         raw: false
                     })
                 }
@@ -406,8 +406,8 @@ let checkSeeCandiate = (data) => {
                             errMessage: "Ok"
                         })
                     }
-                    else if (company.allowCV > 0) {
-                        company.allowCV -= 1
+                    else if (company.allowCv > 0) {
+                        company.allowCv -= 1
                         await company.save()
                         resolve({
                             errCode: 0,
