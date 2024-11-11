@@ -186,6 +186,11 @@ let getDetailCvById = (data) => {
                         }
                     ]
                 })
+                if (data.roleCode !== 'CANDIDATE')
+                {
+                    cv.isChecked = 1
+                    await cv.save()
+                }
                 if (cv.file) {
                     cv.file = new Buffer.from(cv.file, 'base64').toString('binary');
                 }
