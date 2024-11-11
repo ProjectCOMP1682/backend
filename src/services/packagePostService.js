@@ -108,7 +108,9 @@ let getAllPackage = (data) => {
                     offset: +data.offset,
                     limit: +data.limit
                 }
-
+                if (data.search) {
+                    objectFilter.where = {name: {[Op.like]: `%${data.search}%`}}
+                }
                 let packagePosts = await db.PackagePost.findAndCountAll(objectFilter)
                 resolve({
                     errCode: 0,
