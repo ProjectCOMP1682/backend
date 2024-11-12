@@ -93,6 +93,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-package-cv-select',middlewareControllers.verifyTokenUser,packageCvController.getAllToSelect)
     router.get('/api/get-payment-cv-link', middlewareControllers.verifyTokenUser,packageCvController.getPaymentLink)
     router.post('/api/payment-cv-success',middlewareControllers.verifyTokenUser  ,packageCvController.paymentOrderSuccess)
+    router.get('/api/get-history-trade-cv',middlewareControllers.verifyTokenUser,packageCvController.getHistoryTrade)
 
     return app.use("/", router);
 }

@@ -334,7 +334,82 @@ let paymentOrderSuccess = (data) => {
         }
     })
 }
+let getHistoryTrade = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let company = await db.Company.findOne({
+                    where: { id: data.companyId }
+                })
+                if (!company) {
+                    resolve({
+                        errCode: 2,
+                        errorMessage: 'Company does not exist',
+                    })
+                }
+                else {
+                    let listUserOfCompany = await db.User.findAll({
+                        where: { companyId: company.id },
+                        attributes: ['id'],
+                    })
+                    listUserOfCompany = listUserOfCompany.map(item => {
+                        return {
+                            userId: item.id
+                        }
+                    })
+                    let objectFilter = {
+                        where: {
+                            [Op.and]: [{ [Op.or]: listUserOfCompany }]
+                        },
+                        order: [['updatedAt', 'DESC']],
+                        nest: true,
+                        raw: true,
+                        include: [
+                            { model: db.User, as: 'userOrderCvData',
+                                attributes: {
+                                    exclude: ['userId']
+                                },
+                            },
+                            { model: db.PackageCv, as: 'packageOrderCvData'}
+                        ]
+                    }
+
+                    if (data.limit && data.offset) {
+                        objectFilter = {
+                            ...objectFilter,
+                            limit: +data.limit,
+                            offset: +data.offset
+                        }
+                    }
+
+                    if (data.fromDate && data.toDate) {
+                        objectFilter.where = {
+                            ...objectFilter.where,
+                            createdAt: { [Op.and]: [{ [Op.gte]: `${data.fromDate} 00:00:00` }, { [Op.lte]: `${data.toDate} 23:59:59` }] }
+                        }
+                    }
+
+                    let res = await db.OrderPackageCV.findAndCountAll(objectFilter)
+
+                    resolve({
+                        errCode: 0,
+                        data: res.rows,
+                        count: res.count
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error.message)
+        }
+    })
+
+}
 
 module.exports = {
-getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,
+getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,getHistoryTrade,
 }
