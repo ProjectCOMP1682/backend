@@ -132,6 +132,19 @@ let handleReupPost = async (req, res) => {
         })
     }
 }
+let getStatisticalTypePost = async (req, res) => {
+    try {
+        let data = await postService.getStatisticalTypePost(req.query);
+        return res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -143,5 +156,7 @@ module.exports = {
     getDetailPostById: getDetailPostById,
     getFilterPost: getFilterPost,
     getListNoteByPost: getListNoteByPost,
-    handleReupPost: handleReupPost
+    handleReupPost: handleReupPost,
+    getStatisticalTypePost: getStatisticalTypePost,
+
 }

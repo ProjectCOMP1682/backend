@@ -828,6 +828,45 @@ let handleReupPost = (data) => {
         }
     })
 }
+
+let getStatisticalTypePost = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let res = await db.Post.findAll({
+                where: {
+                    statusCode: 'PS1'
+                },
+                include: [
+                    {
+                        model: db.DetailPost, as: 'postDetailData', attributes: [],
+                        include: [
+                            { model: db.Allcode, as: 'jobTypePostData', attributes: ['value', 'code'] }
+                        ],
+                    }
+                ],
+                attributes: [[db.sequelize.fn('COUNT', db.sequelize.col('postDetailData.categoryJobCode')), 'amount']],
+                group: ['postDetailData.categoryJobCode'],
+                order: [[db.sequelize.literal('amount'), 'DESC']],
+                limit: +data.limit,
+                raw: true,
+                nest: true
+            })
+            let totalPost = await db.Post.findAndCountAll({
+                where: {
+                    statusCode: 'PS1'
+                },
+            })
+            resolve({
+                errCode: 0,
+                data: res,
+                totalPost: totalPost.count
+            })
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleCreateNewPost: handleCreateNewPost,
     handleUpdatePost: handleUpdatePost,
@@ -839,5 +878,7 @@ module.exports = {
     getDetailPostById: getDetailPostById,
     getFilterPost: getFilterPost,
     getListNoteByPost: getListNoteByPost,
-    handleReupPost: handleReupPost
+    handleReupPost: handleReupPost,
+    getStatisticalTypePost: getStatisticalTypePost,
+
 }

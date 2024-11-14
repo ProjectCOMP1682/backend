@@ -65,6 +65,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-filter-post', postController.getFilterPost)
     router.get('/api/get-note-by-post', middlewareControllers.verifyTokenUser,postController.getListNoteByPost)
     router.post('/api/create-reup-post', middlewareControllers.verifyTokenUser,postController.handleReupPost)
+    router.get('/api/get-statistical-post', middlewareControllers.verifyTokenUser,postController.getStatisticalTypePost)
 
     //==================API Cv==========================//
     router.post('/api/create-new-cv', middlewareControllers.verifyTokenUser,cvController.handleCreateNewCV)
