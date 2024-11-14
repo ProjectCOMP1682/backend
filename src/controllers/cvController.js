@@ -72,7 +72,18 @@ let checkSeeCandiate= async (req, res) => {
         })
     }
 }
-
+let getStatisticalCv= async (req, res) => {
+    try {
+        let data = await cvService.getStatisticalCv(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 
 module.exports = {
     handleCreateNewCV: handleCreateNewCV,
@@ -80,6 +91,7 @@ module.exports = {
     getDetailCvById: getDetailCvById,
     getAllCvByUserId: getAllCvByUserId,
     fillterCVBySelection: fillterCVBySelection,
-    checkSeeCandiate:checkSeeCandiate
+    checkSeeCandiate:checkSeeCandiate,
+    getStatisticalCv:getStatisticalCv
 
 }

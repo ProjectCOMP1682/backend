@@ -433,12 +433,117 @@ let checkSeeCandiate = (data) => {
         }
     })
 }
+let getStatisticalCv = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.fromDate || !data.toDate  || !data.companyId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            }
+            let company = await db.Company.findOne({
+                where: { id: data.companyId }
+            })
+            if (company) {
+                let listUserOfCompany = await db.User.findAll({
+                    where: { companyId: company.id },
+                    attributes: ['id'],
+                })
+                listUserOfCompany = listUserOfCompany.map(item => {
+                    return {
+                        userId: item.id
+                    }
+                })
+                let listPost = await db.Post.findAndCountAll({
+                    where: {
+                        [Op.and]: [{ [Op.or]: listUserOfCompany }]
+                    },
+                    include: [
+                        {
+                            model: db.User, as: 'userPostData',
+                            attributes: {
+                                exclude: ['userId']
+                            }
+                        },
+                        {
+                            model: db.DetailPost, as: 'postDetailData',
+                            attributes: {
+                                exclude: ['statusCode']
+                            }
+                        }
+                    ],
+                    nest: true,
+                    raw: true,
+                    limit: +data.limit,
+                    offset: +data.offset,
+                    order: [['createdAt', 'ASC']]
+                })
+                let listPostId = listPost.rows.map(item =>
+                    ({
+                        postId: item.id
+                    })
+                )
+
+                let listCv = await db.Cv.findAll({
+                    where: {
+                        createdAt: { [Op.and]: [{ [Op.gte]: `${data.fromDate} 00:00:00` }, { [Op.lte]: `${data.toDate} 23:59:59` }] },
+                        [Op.and]: [{ [Op.or]: listPostId }]
+                    },
+                    attributes: ['postId', [db.sequelize.fn('COUNT', db.sequelize.col('postId')), 'total']],
+                    group: ['postId']
+                })
+                listPost.rows = listPost.rows.map(post => {
+                        let count = 1
+                        let length = listCv.length
+                        if (length == 0) {
+                            return {
+                                ...post,
+                                total: 0
+                            }
+                        }
+                        for (let cv of listCv) {
+                            if (cv.postId == post.id) {
+                                return {
+                                    ...post,
+                                    total: cv.total
+                                }
+                            }
+                            else if (count == length) {
+                                return {
+                                    ...post,
+                                    total: 0
+                                }
+                            }
+                            count++
+                        }
+                    }
+                )
+                resolve({
+                    errCode: 0,
+                    data: listPost.rows,
+                    count: listPost.count
+                })
+            }
+            else {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Company not found'
+                })
+            }
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     handleCreateCv: handleCreateCv,
     getAllListCvByPost: getAllListCvByPost,
     getDetailCvById: getDetailCvById,
     getAllCvByUserId: getAllCvByUserId,
     fillterCVBySelection: fillterCVBySelection,
-    checkSeeCandiate: checkSeeCandiate
-
+    checkSeeCandiate: checkSeeCandiate,
+    getStatisticalCv:getStatisticalCv,
 }

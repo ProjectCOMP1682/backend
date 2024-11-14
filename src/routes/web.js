@@ -74,6 +74,8 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-cv-by-userId', middlewareControllers.verifyTokenUser,cvController.getAllCvByUserId)
     router.get('/api/fillter-cv-by-selection', cvController.fillterCVBySelection)
     router.get('/api/check-see-candiate', middlewareControllers.verifyTokenUser,cvController.checkSeeCandiate)
+    router.get('/api/get-statistical-cv', middlewareControllers.verifyTokenUser,cvController.getStatisticalCv)
+
     //==================API PACKAGE==========================//
     router.post('/api/create-package-post', middlewareControllers.verifyTokenAdmin ,packageController.creatNewPackagePost)
     router.put('/api/update-package-post',middlewareControllers.verifyTokenAdmin , packageController.updatePackagePost)
