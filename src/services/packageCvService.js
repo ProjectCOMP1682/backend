@@ -410,6 +410,78 @@ let getHistoryTrade = (data) => {
 
 }
 
+let getStatisticalPackage = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.fromDate || !data.toDate ) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            }
+            else {
+                let filterListPackage = {}
+                if (data.limit && data.offset) {
+                    filterListPackage.limit = +data.limit
+                    filterListPackage.offset = +data.offset
+                }
+                let listPackage = await db.PackageCv.findAndCountAll(filterListPackage)
+                let listOrderPackage = await db.OrderPackageCV.findAll({
+                    where: {
+                        createdAt: { [Op.and]: [{ [Op.gte]: `${data.fromDate} 00:00:00` }, { [Op.lte]: `${data.toDate} 23:59:59` }] }
+                    },
+                    attributes: ['packageCvId',[db.sequelize.literal('SUM(amount)'), 'count'],[db.sequelize.literal('SUM(currentPrice * amount)'), 'total']],
+                    order: [[db.Sequelize.literal('total'), 'DESC']],
+                    group: ['packageCvId'],
+                    nest: true,
+                })
+                const sum = listOrderPackage.reduce(
+                    (previousValue, currentValue) => previousValue + currentValue.total,
+                    0
+                );
+                listPackage.rows = listPackage.rows.map(packageCv => {
+                        let count = 1
+                        let length = listOrderPackage.length
+                        if (length == 0) {
+                            return {
+                                ...packageCv,
+                                count: 0,
+                                total: 0
+                            }
+                        }
+                        for (let order of listOrderPackage) {
+                            if (order.packageCvId == packageCv.id) {
+                                return {
+                                    ...packageCv,
+                                    count: order.count,
+                                    total: order.total
+                                }
+                            }
+                            else if (count == length) {
+                                return {
+                                    ...packageCv,
+                                    total: 0,
+                                    count: 0
+                                }
+                            }
+                            count++
+                        }
+                    }
+                )
+                resolve({
+                    errCode: 0,
+                    data: listPackage.rows,
+                    count: listPackage.count,
+                    sum: sum
+                })
+            }
+        }
+        catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
-getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,getHistoryTrade,
+getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,getHistoryTrade,getStatisticalPackage,
 }

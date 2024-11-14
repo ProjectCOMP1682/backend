@@ -86,6 +86,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-payment-link', middlewareControllers.verifyTokenUser,packageController.getPaymentLink)
     router.post('/api/payment-success',middlewareControllers.verifyTokenUser  ,packageController.paymentOrderSuccess)
     router.get('/api/get-history-trade-post',middlewareControllers.verifyTokenUser,packageController.getHistoryTrade)
+    router.get('/api/get-statistical-package',middlewareControllers.verifyTokenAdmin ,packageController.getStatisticalPackage)
 
     //==================API PACKAGE Cv==========================//
     router.post('/api/create-package-cv', middlewareControllers.verifyTokenAdmin ,packageCvController.creatNewPackageCv)
@@ -97,6 +98,7 @@ let initWebRoutes = (app) => {
     router.get('/api/get-payment-cv-link', middlewareControllers.verifyTokenUser,packageCvController.getPaymentLink)
     router.post('/api/payment-cv-success',middlewareControllers.verifyTokenUser  ,packageCvController.paymentOrderSuccess)
     router.get('/api/get-history-trade-cv',middlewareControllers.verifyTokenUser,packageCvController.getHistoryTrade)
+    router.get('/api/get-all-package-cv-select',middlewareControllers.verifyTokenUser,packageCvController.getAllToSelect)
 
     return app.use("/", router);
 }
