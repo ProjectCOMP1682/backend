@@ -481,7 +481,38 @@ let getStatisticalPackage = (data) => {
         }
     })
 }
+let getSumByYear = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.year) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters !'
+                })
+            } else {
+                let objectFilter = {
+                    attributes: [[db.sequelize.literal('SUM(currentPrice * amount)'), 'total'], [db.sequelize.fn('MONTH', db.sequelize.col('createdAt')),'month']],
+                    where: {
+                        [Op.and]: [
+                            db.sequelize.where(db.sequelize.fn('YEAR', db.sequelize.col('createdAt')), data.year),
+                        ],
+                    },
+                    group: db.sequelize.fn('MONTH', db.sequelize.col('createdAt'))
+                }
 
+                let res = await db.OrderPackageCV.findAll(objectFilter)
+
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
+
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
-getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,getHistoryTrade,getStatisticalPackage,
+getAllPackage, setActiveTypePackage,creatNewPackageCv, updatePackageCv, getPackageById, getAllToSelect,getPaymentLink,paymentOrderSuccess,getHistoryTrade,getStatisticalPackage, getSumByYear
 }
