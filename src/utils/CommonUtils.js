@@ -10,7 +10,20 @@ let encodeToken = (userId) =>{
     },process.env.JWT_SECRET
 )
 }
-
+let getAllKeyWords = (text) => {
+    let options = {
+        language: "english",
+        remove_digits: true,
+        return_changed_case: true,
+        remove_duplicates: true
+    }
+    let listKeyWord = keywordExtractor.extract(text,options)
+    let mapListKeyWord = new Map()
+    for(let i =0;i<listKeyWord.length;i++) {
+        mapListKeyWord.set(i,listKeyWord[i])
+    }
+    return mapListKeyWord
+}
 let pdfToString = async(file) => {
     file = file = new Buffer.from(file, 'base64').toString('binary');
     let buffer = new Buffer.from(file.split(",")[1], 'base64');
@@ -34,6 +47,7 @@ let flatAllString= (string) => {
 module.exports = {
     encodeToken:encodeToken,
     flatAllString: flatAllString,
+    getAllKeyWords: getAllKeyWords,
     pdfToString:pdfToString,
 
 }

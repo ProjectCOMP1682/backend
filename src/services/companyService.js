@@ -1,5 +1,5 @@
 const { Op, and, where } = require("sequelize");
-import e from "express";
+import express from "express";
 import db from "../models/index";
 const cloudinary = require('../utils/cloudinary');
 require('dotenv').config();
@@ -52,6 +52,32 @@ let checkCompany = (name, id = null) => {
                     })
                 }
                 if (company) {
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
+            }
+
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+let checkUserPhone = (userPhone) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!userPhone) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters!'
+                })
+            } else {
+                let account = await db.Account.findOne({
+                    where: { phonenumber: userPhone }
+                })
+                if (account) {
                     resolve(true)
                 } else {
                     resolve(false)
@@ -123,12 +149,16 @@ let handleCreateNewCompany = (data) => {
 
             // Update the user and account details with the new company ID
             let user = await db.User.findOne({
-                where: { id: data.userId },
+                where: { id: data.userId },attributes: {
+                    exclude: ['userId']
+                },
                 raw: false
             });
 
             let account = await db.Account.findOne({
-                where: { userId: data.userId },
+                where: { userId: data.userId },attributes: {
+                    exclude: ['userId']
+                },
                 raw: false
             });
 

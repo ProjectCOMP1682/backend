@@ -6,6 +6,7 @@ import postController from '../controllers/postController';
 import cvController from '../controllers/cvController'
 import packageController from '../controllers/packagePostController'
 import packageCvController from '../controllers/packageCvController'
+import messageController from '../controllers/messageController';
 
 import middlewareControllers from '../middlewares/jwtVerify'
 let router = express.Router();
@@ -35,10 +36,10 @@ let initWebRoutes = (app) => {
     router.post('/api/create-new-skill',middlewareControllers.verifyTokenAdmin ,allcodeController.handleCreateNewSkill)
     router.delete('/api/delete-skill',middlewareControllers.verifyTokenAdmin ,allcodeController.handleDeleteSkill)
     router.put('/api/update-skill', middlewareControllers.verifyTokenAdmin,allcodeController.handleUpdateSkill)
-    router.get('/api/get-list-skill', allcodeController.getListSkill)
-    router.get('/api/get-detail-skill-by-id',middlewareControllers.verifyTokenAdmin ,allcodeController.getDetailSkillById)
-    router.get('/api/get-list-job-count-post', allcodeController.getListJobTypeAndCountPost)
-    router.get('/api/get-all-skill-by-job-code', allcodeController.getAllSkillByJobCode)
+        router.get('/api/get-list-skill', allcodeController.getListSkill)
+        router.get('/api/get-detail-skill-by-id',middlewareControllers.verifyTokenAdmin ,allcodeController.getDetailSkillById)
+        router.get('/api/get-list-job-count-post', allcodeController.getListJobTypeAndCountPost)
+        router.get('/api/get-all-skill-by-job-code', allcodeController.getAllSkillByJobCode)
 
     //==================API COMPANY=========================//
     router.post('/api/create-new-company', middlewareControllers.verifyTokenUser,companyController.handleCreateNewCompany)
@@ -102,7 +103,12 @@ let initWebRoutes = (app) => {
     router.get('/api/get-all-package-cv-select',middlewareControllers.verifyTokenUser,packageCvController.getAllToSelect)
     router.get('/api/get-statistical-package-cv',middlewareControllers.verifyTokenAdmin ,packageCvController.getStatisticalPackageCv)
     router.get('/api/get-sum-by-year-cv',middlewareControllers.verifyTokenAdmin,packageCvController.getSumByYear)
-
+    //=================API MESSAGE============================//
+    router.post('/api/create-new-room', middlewareControllers.verifyTokenUser, messageController.createNewRoom)
+    router.post('/api/sendMessage', middlewareControllers.verifyTokenUser, messageController.sendMessage)
+    router.get('/api/loadMessage', middlewareControllers.verifyTokenUser, messageController.loadMessage)
+    router.get('/api/listRoomOfUser', middlewareControllers.verifyTokenUser, messageController.listRoomOfUser)
+    router.get('/api/listRoomOfAdmin', middlewareControllers.verifyTokenAdmin, messageController.listRoomOfAdmin)
     return app.use("/", router);
 }
 
